@@ -1,10 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
+import { DashboardLayout } from "./DashboardLayout";
 import { Construction } from "lucide-react";
-
-export const Route = createFileRoute("/_stub")({
-  component: () => null,
-});
 
 export function StubPage({ title, subtitle }: { title: string; subtitle: string }) {
   return (
