@@ -1,0 +1,205 @@
+import { useMemo, useState } from "react";
+import {
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  Filter,
+  Search,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+
+type Status = "Active" | "Inactive" | "Suspended";
+type Plan = "Free" | "Basic" | "Premium";
+
+type Row = {
+  name: string;
+  email: string;
+  university: string;
+  plan: Plan;
+  lastActive: string;
+  status: Status;
+};
+
+const ROWS: Row[] = [
+  { name: "Ananya Sharma", email: "ananya@iitb.ac.in", university: "IIT Bombay", plan: "Premium", lastActive: "2 min ago", status: "Active" },
+  { name: "Karan Mehta", email: "karan@bits.ac.in", university: "BITS Pilani", plan: "Premium", lastActive: "12 min ago", status: "Active" },
+  { name: "Riya Patel", email: "riya@du.ac.in", university: "Delhi University", plan: "Basic", lastActive: "1 hr ago", status: "Active" },
+  { name: "Mohit Verma", email: "mohit@dtu.ac.in", university: "DTU", plan: "Free", lastActive: "3 hr ago", status: "Inactive" },
+  { name: "Sneha Reddy", email: "sneha@iisc.ac.in", university: "IISc Bangalore", plan: "Premium", lastActive: "5 hr ago", status: "Active" },
+  { name: "Arjun Singh", email: "arjun@iitm.ac.in", university: "IIT Madras", plan: "Basic", lastActive: "1 day ago", status: "Suspended" },
+  { name: "Pooja Iyer", email: "pooja@nitt.edu", university: "NIT Trichy", plan: "Basic", lastActive: "2 days ago", status: "Active" },
+  { name: "Vikram Joshi", email: "vikram@vit.ac.in", university: "VIT Vellore", plan: "Free", lastActive: "3 days ago", status: "Inactive" },
+  { name: "Neha Kapoor", email: "neha@iiitd.ac.in", university: "IIIT Delhi", plan: "Premium", lastActive: "20 min ago", status: "Active" },
+  { name: "Rahul Nair", email: "rahul@iitk.ac.in", university: "IIT Kanpur", plan: "Premium", lastActive: "45 min ago", status: "Active" },
+  { name: "Tara Bose", email: "tara@jadav.edu", university: "Jadavpur University", plan: "Basic", lastActive: "6 hr ago", status: "Active" },
+  { name: "Imran Khan", email: "imran@amu.ac.in", university: "AMU", plan: "Free", lastActive: "4 days ago", status: "Suspended" },
+];
+
+const statusStyles: Record<Status, string> = {
+  Active: "bg-primary-soft text-primary ring-primary/20",
+  Inactive: "bg-muted text-muted-foreground ring-border",
+  Suspended: "bg-[oklch(0.96_0.06_50)] text-accent ring-accent/30",
+};
+
+const planStyles: Record<Plan, string> = {
+  Free: "bg-muted text-muted-foreground",
+  Basic: "bg-[oklch(0.96_0.04_240)] text-[oklch(0.45_0.15_240)]",
+  Premium: "bg-gradient-to-br from-primary/10 to-accent/10 text-primary",
+};
+
+export function DataTable() {
+  const [q, setQ] = useState("");
+  const [sortAsc, setSortAsc] = useState(false);
+  const [page, setPage] = useState(1);
+  const perPage = 6;
+
+  const filtered = useMemo(() => {
+    const f = ROWS.filter(
+      (r) =>
+        r.name.toLowerCase().includes(q.toLowerCase()) ||
+        r.university.toLowerCase().includes(q.toLowerCase()),
+    );
+    f.sort((a, b) => (sortAsc ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)));
+    return f;
+  }, [q, sortAsc]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
+  const slice = filtered.slice((page - 1) * perPage, page * perPage);
+
+  return (
+    <div className="rounded-2xl border border-border bg-card shadow-card">
+      {/* Toolbar */}
+      <div className="flex flex-wrap items-center gap-3 p-5 border-b border-border">
+        <div>
+          <h3 className="text-[15px] font-semibold tracking-tight">Student Analytics</h3>
+          <p className="mt-0.5 text-[12px] text-muted-foreground">
+            {filtered.length} of {ROWS.length} students
+          </p>
+        </div>
+        <div className="ml-auto flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-1.5 text-sm">
+            <Search className="h-4 w-4 text-muted-foreground" />
+            <input
+              value={q}
+              onChange={(e) => {
+                setQ(e.target.value);
+                setPage(1);
+              }}
+              placeholder="Search students…"
+              className="w-44 bg-transparent outline-none placeholder:text-muted-foreground/70"
+            />
+          </div>
+          <button className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-background px-3 py-1.5 text-sm hover:border-primary/40 transition">
+            <Filter className="h-3.5 w-3.5" />
+            Filters
+          </button>
+          <button className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:brightness-110 transition">
+            <Download className="h-3.5 w-3.5" />
+            CSV
+          </button>
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="text-[11px] uppercase tracking-wider text-muted-foreground">
+              <th className="text-left font-medium px-5 py-3">
+                <button
+                  onClick={() => setSortAsc((s) => !s)}
+                  className="inline-flex items-center gap-1 hover:text-foreground"
+                >
+                  Student
+                  <ArrowUpDown className="h-3 w-3" />
+                </button>
+              </th>
+              <th className="text-left font-medium px-5 py-3">University</th>
+              <th className="text-left font-medium px-5 py-3">Plan</th>
+              <th className="text-left font-medium px-5 py-3">Last Active</th>
+              <th className="text-left font-medium px-5 py-3">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {slice.map((r, i) => (
+              <tr
+                key={i}
+                className="border-t border-border hover:bg-muted/40 transition-colors"
+              >
+                <td className="px-5 py-3.5">
+                  <div className="flex items-center gap-3">
+                    <div className="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br from-primary/20 to-accent/20 text-[11px] font-semibold text-primary">
+                      {r.name
+                        .split(" ")
+                        .map((s) => s[0])
+                        .slice(0, 2)
+                        .join("")}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="font-medium text-foreground truncate">{r.name}</div>
+                      <div className="text-[11.5px] text-muted-foreground truncate">{r.email}</div>
+                    </div>
+                  </div>
+                </td>
+                <td className="px-5 py-3.5 text-foreground/80">{r.university}</td>
+                <td className="px-5 py-3.5">
+                  <span
+                    className={cn(
+                      "inline-flex rounded-md px-2 py-0.5 text-[11.5px] font-medium",
+                      planStyles[r.plan],
+                    )}
+                  >
+                    {r.plan}
+                  </span>
+                </td>
+                <td className="px-5 py-3.5 text-muted-foreground tabular-nums">{r.lastActive}</td>
+                <td className="px-5 py-3.5">
+                  <span
+                    className={cn(
+                      "inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11.5px] font-medium ring-1 ring-inset",
+                      statusStyles[r.status],
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "h-1.5 w-1.5 rounded-full",
+                        r.status === "Active" && "bg-primary",
+                        r.status === "Inactive" && "bg-muted-foreground",
+                        r.status === "Suspended" && "bg-accent",
+                      )}
+                    />
+                    {r.status}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Pagination */}
+      <div className="flex items-center justify-between px-5 py-3.5 border-t border-border">
+        <div className="text-[12px] text-muted-foreground">
+          Page {page} of {totalPages}
+        </div>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="grid h-8 w-8 place-items-center rounded-lg border border-border bg-background disabled:opacity-40 hover:border-primary/40 transition"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+            className="grid h-8 w-8 place-items-center rounded-lg border border-border bg-background disabled:opacity-40 hover:border-primary/40 transition"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
