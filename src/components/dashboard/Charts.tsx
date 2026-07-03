@@ -13,44 +13,12 @@ import {
   YAxis,
 } from "recharts";
 import { ChartCard } from "./ChartCard";
-
-const growthData = [
-  { m: "Apr", students: 68200, active: 9800 },
-  { m: "May", students: 72400, active: 10500 },
-  { m: "Jun", students: 78900, active: 11800 },
-  { m: "Jul", students: 84300, active: 12900 },
-  { m: "Aug", students: 91200, active: 13700 },
-  { m: "Sep", students: 96500, active: 14600 },
-  { m: "Oct", students: 102800, active: 15400 },
-  { m: "Nov", students: 108400, active: 16100 },
-  { m: "Dec", students: 112900, active: 16800 },
-  { m: "Jan", students: 117200, active: 17500 },
-  { m: "Feb", students: 121800, active: 18100 },
-  { m: "Mar", students: 125420, active: 18540 },
-];
-
-const plans = [
-  { name: "Free", value: 64, color: "oklch(0.75 0.02 250)" },
-  { name: "Basic", value: 24, color: "oklch(0.55 0.15 240)" },
-  { name: "Premium", value: 12, color: "oklch(0.62 0.17 148)" },
-];
-
-const universities = [
-  { name: "IIT Bombay", v: 14200 },
-  { name: "BITS Pilani", v: 11800 },
-  { name: "Delhi University", v: 10400 },
-  { name: "IISc Bangalore", v: 9200 },
-  { name: "IIT Madras", v: 8600 },
-  { name: "VIT Vellore", v: 7100 },
-  { name: "NIT Trichy", v: 6300 },
-];
-
-const funnel = [
-  { stage: "Applied", v: 12800, c: "oklch(0.62 0.17 148)" },
-  { stage: "Reviewed", v: 7400, c: "oklch(0.65 0.16 175)" },
-  { stage: "Shortlisted", v: 3100, c: "oklch(0.55 0.15 240)" },
-  { stage: "Hired", v: 820, c: "oklch(0.72 0.18 50)" },
-];
+import {
+  studentGrowth as growthData,
+  planDistribution as plans,
+  topUniversities as universities,
+  applicationFunnel as funnel,
+} from "@/lib/mock-data";
 
 function TooltipBox({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
