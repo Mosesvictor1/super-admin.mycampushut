@@ -1,4 +1,3 @@
-import { createFileRoute } from "@tanstack/react-router";
 import {
   Server,
   Activity,
@@ -22,12 +21,9 @@ import { ChartCard } from "@/components/dashboard/ChartCard";
 import { MiniStat } from "@/components/dashboard/MiniStat";
 import { AlertCard } from "@/components/dashboard/AlertCard";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
+import { useDocumentTitle } from "@/hooks/use-document-title";
 import { cn } from "@/lib/utils";
-
-export const Route = createFileRoute("/platform")({
-  head: () => ({ meta: [{ title: "CampusHut Admin — Platform Overview" }] }),
-  component: PlatformPage,
-});
+import { toast } from "sonner";
 
 const latency = Array.from({ length: 24 }, (_, i) => ({
   t: `${i}:00`,
@@ -49,7 +45,8 @@ const statusCls: Record<(typeof services)[number]["status"], string> = {
   Degraded: "bg-[oklch(0.96_0.04_50)] text-accent ring-accent/30",
 };
 
-function PlatformPage() {
+export default function PlatformPage() {
+  useDocumentTitle("CampusHut Admin — Platform Overview");
   return (
     <DashboardLayout title="Platform Overview" subtitle="Infrastructure health, latency, and reliability across services">
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -144,7 +141,11 @@ function PlatformPage() {
               </thead>
               <tbody>
                 {services.map((s) => (
-                  <tr key={s.name} className="border-t border-border hover:bg-muted/40">
+                  <tr
+                    key={s.name}
+                    onClick={() => toast(`${s.name}`, { description: `${s.status} · ${s.latency} · Uptime ${s.uptime}%` })}
+                    className="border-t border-border hover:bg-muted/40 cursor-pointer"
+                  >
                     <td className="px-5 py-3.5 font-medium">{s.name}</td>
                     <td className="px-5 py-3.5 tabular-nums">{s.uptime}%</td>
                     <td className="px-5 py-3.5 text-muted-foreground tabular-nums">{s.latency}</td>

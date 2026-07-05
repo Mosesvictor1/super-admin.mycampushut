@@ -1,4 +1,3 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { Briefcase, Send, MessagesSquare, Award, Star } from "lucide-react";
 import {
   Bar,
@@ -11,6 +10,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { useState } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { ChartCard } from "@/components/dashboard/ChartCard";
 import { MiniStat } from "@/components/dashboard/MiniStat";
@@ -21,11 +21,14 @@ import {
   topRoles,
   topRecruiters,
 } from "@/lib/mock-data";
-
-export const Route = createFileRoute("/jobs")({
-  head: () => ({ meta: [{ title: "CampusHut Admin — Jobs Analytics" }] }),
-  component: JobsPage,
-});
+import { useDocumentTitle } from "@/hooks/use-document-title";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 function TT({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
@@ -43,7 +46,10 @@ function TT({ active, payload, label }: any) {
   );
 }
 
-function JobsPage() {
+export default function JobsPage() {
+  useDocumentTitle("CampusHut Admin — Jobs Analytics");
+  const [recruiter, setRecruiter] = useState<(typeof topRecruiters)[number] | null>(null);
+
   return (
     <DashboardLayout title="Jobs Analytics" subtitle="Applications, hiring funnel, and recruiter performance">
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -110,7 +116,11 @@ function JobsPage() {
               </thead>
               <tbody>
                 {topRecruiters.map((r) => (
-                  <tr key={r.name} className="border-t border-border hover:bg-muted/40 transition-colors">
+                  <tr
+                    key={r.name}
+                    onClick={() => setRecruiter(r)}
+                    className="border-t border-border hover:bg-muted/40 transition-colors cursor-pointer"
+                  >
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
                         <div className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-primary/15 to-accent/15 text-[11px] font-semibold text-primary">
@@ -137,6 +147,34 @@ function JobsPage() {
           </div>
         </div>
       </div>
+
+      <Dialog open={!!recruiter} onOpenChange={(v) => !v && setRecruiter(null)}>
+        <DialogContent>
+          {recruiter && (
+            <>
+              <DialogHeader>
+                <DialogTitle>{recruiter.name}</DialogTitle>
+                <DialogDescription>Recruiter performance this quarter</DialogDescription>
+              </DialogHeader>
+              <div className="mt-2 grid grid-cols-2 gap-3 text-[13px]">
+                <Stat label="Active jobs" value={String(recruiter.jobs)} />
+                <Stat label="Hires" value={String(recruiter.hires)} />
+                <Stat label="Conversion" value={`${((recruiter.hires / recruiter.jobs) * 100).toFixed(1)}%`} />
+                <Stat label="Rating" value={`${recruiter.rating} / 5`} />
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-border p-3">
+      <div className="text-[11px] uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className="mt-1 font-semibold tabular-nums">{value}</div>
+    </div>
   );
 }

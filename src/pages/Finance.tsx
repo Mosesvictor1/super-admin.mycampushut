@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { Wallet, TrendingUp, Users, PieChart as PieIcon, CheckCircle2, XCircle, RotateCcw } from "lucide-react";
 import {
   Area,
@@ -8,7 +8,6 @@ import {
   CartesianGrid,
   Cell,
   Line,
-  LineChart,
   Pie,
   PieChart,
   ResponsiveContainer,
@@ -26,12 +25,16 @@ import {
   paymentMethods,
   transactions,
 } from "@/lib/mock-data";
+import { useDocumentTitle } from "@/hooks/use-document-title";
 import { cn } from "@/lib/utils";
-
-export const Route = createFileRoute("/finance")({
-  head: () => ({ meta: [{ title: "CampusHut Admin — Finance & Subscription" }] }),
-  component: FinancePage,
-});
+import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 function TT({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
@@ -57,7 +60,10 @@ const statusStyle = {
   Refunded: { cls: "bg-[oklch(0.96_0.04_50)] text-accent ring-accent/20", Icon: RotateCcw },
 } as const;
 
-function FinancePage() {
+export default function FinancePage() {
+  useDocumentTitle("CampusHut Admin — Finance & Subscription");
+  const [txn, setTxn] = useState<(typeof transactions)[number] | null>(null);
+
   return (
     <DashboardLayout title="Finance & Subscription" subtitle="MRR, revenue, churn, and payments across all plans">
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -150,7 +156,12 @@ function FinancePage() {
               <h3 className="text-[15px] font-semibold tracking-tight">Recent Transactions</h3>
               <p className="mt-0.5 text-[12px] text-muted-foreground">Latest {transactions.length} payment events</p>
             </div>
-            <button className="text-[12px] text-primary hover:underline">Export CSV</button>
+            <button
+              onClick={() => toast.success("CSV export queued")}
+              className="text-[12px] text-primary hover:underline"
+            >
+              Export CSV
+            </button>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -168,7 +179,11 @@ function FinancePage() {
                 {transactions.map((t) => {
                   const s = statusStyle[t.status];
                   return (
-                    <tr key={t.id} className="border-t border-border hover:bg-muted/40 transition-colors">
+                    <tr
+                      key={t.id}
+                      onClick={() => setTxn(t)}
+                      className="border-t border-border hover:bg-muted/40 transition-colors cursor-pointer"
+                    >
                       <td className="px-5 py-3 font-mono text-[12px] text-muted-foreground">{t.id}</td>
                       <td className="px-5 py-3 font-medium">{t.user}</td>
                       <td className="px-5 py-3 tabular-nums font-semibold">₦{t.amount.toLocaleString()}</td>
@@ -188,6 +203,36 @@ function FinancePage() {
           </div>
         </div>
       </div>
+
+      <Dialog open={!!txn} onOpenChange={(v) => !v && setTxn(null)}>
+        <DialogContent>
+          {txn && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="font-mono">{txn.id}</DialogTitle>
+                <DialogDescription>Transaction details</DialogDescription>
+              </DialogHeader>
+              <dl className="mt-2 grid grid-cols-2 gap-3 text-[13px]">
+                <Field label="User" value={txn.user} />
+                <Field label="Plan" value={txn.plan} />
+                <Field label="Amount" value={`₦${txn.amount.toLocaleString()}`} />
+                <Field label="Method" value={txn.method} />
+                <Field label="Status" value={txn.status} />
+                <Field label="Date" value={txn.date} />
+              </dl>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
+  );
+}
+
+function Field({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-border p-3">
+      <div className="text-[11px] uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className="mt-1 font-medium">{value}</div>
+    </div>
   );
 }

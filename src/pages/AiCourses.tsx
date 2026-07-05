@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { Sparkles, GraduationCap, MessagesSquare, Star } from "lucide-react";
 import {
   Area,
@@ -13,13 +13,19 @@ import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { ChartCard } from "@/components/dashboard/ChartCard";
 import { MiniStat } from "@/components/dashboard/MiniStat";
 import { aiCourseKPIs, enrollmentTrend, aiCourses } from "@/lib/mock-data";
+import { useDocumentTitle } from "@/hooks/use-document-title";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
-export const Route = createFileRoute("/ai-courses")({
-  head: () => ({ meta: [{ title: "CampusHut Admin — AI Courses" }] }),
-  component: AICoursesPage,
-});
+export default function AiCoursesPage() {
+  useDocumentTitle("CampusHut Admin — AI Courses");
+  const [course, setCourse] = useState<(typeof aiCourses)[number] | null>(null);
 
-function AICoursesPage() {
   return (
     <DashboardLayout title="AI Courses" subtitle="Enrollments, completion, engagement, and CSAT">
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -86,7 +92,11 @@ function AICoursesPage() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 p-5">
           {aiCourses.map((c) => (
-            <div key={c.title} className="rounded-xl border border-border p-4 card-hover">
+            <button
+              key={c.title}
+              onClick={() => setCourse(c)}
+              className="text-left rounded-xl border border-border p-4 card-hover"
+            >
               <div className="flex items-start justify-between gap-3">
                 <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-primary/15 to-[oklch(0.65_0.18_300_/_0.15)] text-primary">
                   <Sparkles className="h-5 w-5" />
@@ -107,10 +117,38 @@ function AICoursesPage() {
                   <div className="h-full rounded-full bg-primary" style={{ width: `${c.completion}%` }} />
                 </div>
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </div>
+
+      <Dialog open={!!course} onOpenChange={(v) => !v && setCourse(null)}>
+        <DialogContent>
+          {course && (
+            <>
+              <DialogHeader>
+                <DialogTitle>{course.title}</DialogTitle>
+                <DialogDescription>{course.hours} hours · {course.students.toLocaleString()} students enrolled</DialogDescription>
+              </DialogHeader>
+              <div className="mt-2 grid grid-cols-2 gap-3 text-[13px]">
+                <F label="Completion" value={`${course.completion}%`} />
+                <F label="Rating" value={`${course.rating} / 5`} />
+                <F label="Students" value={course.students.toLocaleString()} />
+                <F label="Hours" value={String(course.hours)} />
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
+  );
+}
+
+function F({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-border p-3">
+      <div className="text-[11px] uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className="mt-1 font-semibold tabular-nums">{value}</div>
+    </div>
   );
 }

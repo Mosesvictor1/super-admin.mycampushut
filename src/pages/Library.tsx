@@ -1,4 +1,3 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { BookOpen, Eye, Star, Clock, FileText, Video, Layers, PlayCircle } from "lucide-react";
 import {
   Cell,
@@ -11,11 +10,8 @@ import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { ChartCard } from "@/components/dashboard/ChartCard";
 import { MiniStat } from "@/components/dashboard/MiniStat";
 import { libraryKPIs, resourceByType, topResources } from "@/lib/mock-data";
-
-export const Route = createFileRoute("/library")({
-  head: () => ({ meta: [{ title: "CampusHut Admin — Learning Library" }] }),
-  component: LibraryPage,
-});
+import { useDocumentTitle } from "@/hooks/use-document-title";
+import { toast } from "sonner";
 
 const typeIcon: Record<string, typeof FileText> = {
   Video: Video,
@@ -25,7 +21,8 @@ const typeIcon: Record<string, typeof FileText> = {
   Interactive: Layers,
 };
 
-function LibraryPage() {
+export default function LibraryPage() {
+  useDocumentTitle("CampusHut Admin — Learning Library");
   return (
     <DashboardLayout title="Learning Library" subtitle="Content catalog performance, views, ratings, and consumption">
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -70,13 +67,22 @@ function LibraryPage() {
               <h3 className="text-[15px] font-semibold tracking-tight">Top Resources</h3>
               <p className="mt-0.5 text-[12px] text-muted-foreground">Highest views this month</p>
             </div>
-            <button className="text-[12px] text-primary hover:underline">Manage catalog</button>
+            <button
+              onClick={() => toast("Catalog management — coming soon")}
+              className="text-[12px] text-primary hover:underline"
+            >
+              Manage catalog
+            </button>
           </div>
           <ul className="divide-y divide-border">
             {topResources.map((r, i) => {
               const Icon = typeIcon[r.type] ?? FileText;
               return (
-                <li key={r.title} className="flex items-center gap-3 px-5 py-3.5 hover:bg-muted/40 transition-colors">
+                <li
+                  key={r.title}
+                  onClick={() => toast(`Opening "${r.title}"`)}
+                  className="flex items-center gap-3 px-5 py-3.5 hover:bg-muted/40 transition-colors cursor-pointer"
+                >
                   <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary text-[11px] font-bold tabular-nums">
                     {String(i + 1).padStart(2, "0")}
                   </div>
@@ -94,7 +100,13 @@ function LibraryPage() {
                       {r.rating}
                     </div>
                   </div>
-                  <button className="ml-2 rounded-lg p-1.5 text-muted-foreground hover:bg-primary-soft hover:text-primary">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toast.success(`Previewing "${r.title}"`);
+                    }}
+                    className="ml-2 rounded-lg p-1.5 text-muted-foreground hover:bg-primary-soft hover:text-primary"
+                  >
                     <PlayCircle className="h-4 w-4" />
                   </button>
                 </li>

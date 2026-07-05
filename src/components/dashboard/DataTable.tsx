@@ -8,8 +8,10 @@ import {
   Search,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
-import { studentRows as ROWS, type Plan, type UserStatus as Status } from "@/lib/mock-data";
+import { studentRows as ALL_ROWS, type Plan, type UserStatus as Status } from "@/lib/mock-data";
+import { StudentDetailModal, type StudentDetail } from "./StudentDetailModal";
 
 const statusStyles: Record<Status, string> = {
   Active: "bg-primary-soft text-primary ring-primary/20",
@@ -23,11 +25,23 @@ const planStyles: Record<Plan, string> = {
   Premium: "bg-gradient-to-br from-primary/10 to-accent/10 text-primary",
 };
 
-export function DataTable() {
+export function DataTable({
+  title = "Student Analytics",
+  subtitle,
+  rows,
+  perPage = 6,
+}: {
+  title?: string;
+  subtitle?: string;
+  rows?: StudentDetail[];
+  perPage?: number;
+} = {}) {
+  const ROWS = rows ?? ALL_ROWS;
   const [q, setQ] = useState("");
   const [sortAsc, setSortAsc] = useState(false);
   const [page, setPage] = useState(1);
-  const perPage = 6;
+  const [selected, setSelected] = useState<StudentDetail | null>(null);
+  const [open, setOpen] = useState(false);
 
   const filtered = useMemo(() => {
     const f = ROWS.filter(
@@ -37,19 +51,18 @@ export function DataTable() {
     );
     f.sort((a, b) => (sortAsc ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)));
     return f;
-  }, [q, sortAsc]);
+  }, [q, sortAsc, ROWS]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
   const slice = filtered.slice((page - 1) * perPage, page * perPage);
 
   return (
     <div className="rounded-2xl border border-border bg-card shadow-card">
-      {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-3 p-5 border-b border-border">
         <div>
-          <h3 className="text-[15px] font-semibold tracking-tight">Student Analytics</h3>
+          <h3 className="text-[15px] font-semibold tracking-tight">{title}</h3>
           <p className="mt-0.5 text-[12px] text-muted-foreground">
-            {filtered.length} of {ROWS.length} students
+            {subtitle ?? `${filtered.length} of ${ROWS.length} students`}
           </p>
         </div>
         <div className="ml-auto flex flex-wrap items-center gap-2">
@@ -65,18 +78,23 @@ export function DataTable() {
               className="w-44 bg-transparent outline-none placeholder:text-muted-foreground/70"
             />
           </div>
-          <button className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-background px-3 py-1.5 text-sm hover:border-primary/40 transition">
+          <button
+            onClick={() => toast("Filters — coming soon")}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-background px-3 py-1.5 text-sm hover:border-primary/40 transition"
+          >
             <Filter className="h-3.5 w-3.5" />
             Filters
           </button>
-          <button className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:brightness-110 transition">
+          <button
+            onClick={() => toast.success("CSV export queued")}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:brightness-110 transition"
+          >
             <Download className="h-3.5 w-3.5" />
             CSV
           </button>
         </div>
       </div>
 
-      {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -100,7 +118,11 @@ export function DataTable() {
             {slice.map((r, i) => (
               <tr
                 key={i}
-                className="border-t border-border hover:bg-muted/40 transition-colors"
+                onClick={() => {
+                  setSelected(r);
+                  setOpen(true);
+                }}
+                className="border-t border-border hover:bg-muted/40 transition-colors cursor-pointer"
               >
                 <td className="px-5 py-3.5">
                   <div className="flex items-center gap-3">
@@ -153,7 +175,6 @@ export function DataTable() {
         </table>
       </div>
 
-      {/* Pagination */}
       <div className="flex items-center justify-between px-5 py-3.5 border-t border-border">
         <div className="text-[12px] text-muted-foreground">
           Page {page} of {totalPages}
@@ -175,6 +196,8 @@ export function DataTable() {
           </button>
         </div>
       </div>
+
+      <StudentDetailModal student={selected} open={open} onOpenChange={setOpen} />
     </div>
   );
 }

@@ -1,13 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { FileBarChart, Calendar, Download, ShieldCheck, Play } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { MiniStat } from "@/components/dashboard/MiniStat";
 import { reportsList, auditEvents } from "@/lib/mock-data";
-
-export const Route = createFileRoute("/reports")({
-  head: () => ({ meta: [{ title: "CampusHut Admin — Reports" }] }),
-  component: ReportsPage,
-});
+import { useDocumentTitle } from "@/hooks/use-document-title";
+import { toast } from "sonner";
 
 const typeCls: Record<string, string> = {
   Finance: "bg-primary-soft text-primary",
@@ -17,7 +13,8 @@ const typeCls: Record<string, string> = {
   Ops: "bg-muted text-muted-foreground",
 };
 
-function ReportsPage() {
+export default function ReportsPage() {
+  useDocumentTitle("CampusHut Admin — Reports");
   return (
     <DashboardLayout title="Reports" subtitle="Scheduled exports, ad-hoc reports, and audit trail">
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -34,7 +31,10 @@ function ReportsPage() {
               <h3 className="text-[15px] font-semibold tracking-tight">Scheduled & Saved Reports</h3>
               <p className="mt-0.5 text-[12px] text-muted-foreground">Managed exports across modules</p>
             </div>
-            <button className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:brightness-110">
+            <button
+              onClick={() => toast.success("Opening report builder…")}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:brightness-110"
+            >
               <Play className="h-3.5 w-3.5" />
               New report
             </button>
@@ -66,7 +66,10 @@ function ReportsPage() {
                     <td className="px-5 py-3.5">{r.owner}</td>
                     <td className="px-5 py-3.5 text-muted-foreground tabular-nums">{r.lastRun}</td>
                     <td className="px-5 py-3.5 text-right">
-                      <button className="inline-flex items-center gap-1 rounded-lg border border-border px-2 py-1 text-[11.5px] hover:border-primary/40">
+                      <button
+                        onClick={() => toast.success(`${r.name} · running now`)}
+                        className="inline-flex items-center gap-1 rounded-lg border border-border px-2 py-1 text-[11.5px] hover:border-primary/40"
+                      >
                         <Download className="h-3 w-3" /> Run
                       </button>
                     </td>
