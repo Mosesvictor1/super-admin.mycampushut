@@ -1,4 +1,4 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   Activity,
@@ -17,11 +17,12 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 const NAV = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
   { to: "/platform", label: "Platform Overview", icon: Activity },
-  { to: "/users", label: "Users Analytics", icon: Users },
+  { to: "/users", label: "User Insights", icon: Users },
   { to: "/finance", label: "Finance & Subscription", icon: Wallet },
   { to: "/jobs", label: "Jobs Analytics", icon: Briefcase },
   { to: "/assignments", label: "Assignments", icon: ClipboardList },
@@ -33,7 +34,7 @@ const NAV = [
 
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { pathname } = useLocation();
 
   return (
     <aside
@@ -46,8 +47,7 @@ export function Sidebar() {
           "radial-gradient(120% 60% at 0% 0%, oklch(0.32 0.08 155 / 0.6), transparent 60%), radial-gradient(80% 40% at 100% 100%, oklch(0.55 0.16 148 / 0.18), transparent 70%)",
       }}
     >
-      {/* Brand */}
-      <div className="flex items-center gap-3 px-5 py-5 border-b border-sidebar-border">
+      <Link to="/" className="flex items-center gap-3 px-5 py-5 border-b border-sidebar-border hover:opacity-90 transition-opacity">
         <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-[oklch(0.72_0.18_148)] to-[oklch(0.55_0.16_148)] shadow-[0_8px_24px_-8px_oklch(0.55_0.16_148_/_0.6)]">
           <GraduationCap className="h-5 w-5 text-white" strokeWidth={2.4} />
         </div>
@@ -61,9 +61,8 @@ export function Sidebar() {
             </div>
           </div>
         )}
-      </div>
+      </Link>
 
-      {/* Nav */}
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
         {!collapsed && (
           <div className="px-3 pb-2 text-[10px] font-medium uppercase tracking-[0.16em] text-sidebar-muted">
@@ -93,12 +92,12 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Footer / profile */}
       <div className="border-t border-sidebar-border p-3">
-        <div
+        <Link
+          to="/settings"
           className={cn(
-            "flex items-center gap-3 rounded-xl p-2",
-            !collapsed && "bg-[oklch(0.30_0.05_155_/_0.6)]",
+            "flex items-center gap-3 rounded-xl p-2 transition-colors",
+            !collapsed && "bg-[oklch(0.30_0.05_155_/_0.6)] hover:bg-[oklch(0.34_0.05_155_/_0.7)]",
           )}
         >
           <div className="relative shrink-0">
@@ -117,11 +116,20 @@ export function Sidebar() {
             </div>
           )}
           {!collapsed && (
-            <button className="rounded-lg p-1.5 text-sidebar-muted hover:bg-[oklch(0.35_0.05_155)] hover:text-white transition-colors">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                toast.success("Signed out (demo)");
+              }}
+              className="rounded-lg p-1.5 text-sidebar-muted hover:bg-[oklch(0.35_0.05_155)] hover:text-white transition-colors"
+              aria-label="Sign out"
+            >
               <LogOut className="h-4 w-4" />
             </button>
           )}
-        </div>
+        </Link>
         <button
           onClick={() => setCollapsed((c) => !c)}
           className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg py-1.5 text-[11px] text-sidebar-muted hover:bg-[oklch(0.30_0.05_155)] hover:text-white transition-colors"
