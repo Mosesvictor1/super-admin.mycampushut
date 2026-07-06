@@ -114,7 +114,8 @@ export default function MarketplacePage() {
     <DashboardLayout
       title="Marketplace"
       subtitle="Vendors, GMV, and order operations across CampusHut"
-      actions={
+    >
+      <div className="mb-4 flex justify-end">
         <button
           onClick={() => toast.success("Vendor invitation link copied")}
           className="inline-flex items-center gap-2 rounded-xl bg-primary px-3.5 py-2 text-sm font-medium text-primary-foreground hover:brightness-110 transition shadow-card"
@@ -122,8 +123,8 @@ export default function MarketplacePage() {
           <Plus className="h-4 w-4" />
           Invite vendor
         </button>
-      }
-    >
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <MiniStat icon={Wallet} tone="primary" label="GMV (30D)" value={marketplaceKPIs.gmv.value} delta={marketplaceKPIs.gmv.delta} />
         <MiniStat icon={Store} tone="blue" label="Active Vendors" value={marketplaceKPIs.vendors.value.toLocaleString()} delta={marketplaceKPIs.vendors.delta} />
@@ -154,12 +155,44 @@ export default function MarketplacePage() {
           </ChartCard>
         </div>
 
-        <PlanDonutChart
-          title="Vendors by Category"
-          description="Share of active vendors"
-          data={vendorCategories}
-        />
+        <ChartCard title="Vendors by Category" description="Share of active vendors">
+          <div className="relative h-[200px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={vendorCategories}
+                  dataKey="value"
+                  innerRadius={58}
+                  outerRadius={84}
+                  paddingAngle={3}
+                  stroke="none"
+                >
+                  {vendorCategories.map((c, i) => (
+                    <Cell key={i} fill={c.color} />
+                  ))}
+                </Pie>
+                <Tooltip content={<TT />} />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+              <div className="text-[11px] uppercase tracking-wider text-muted-foreground">Vendors</div>
+              <div className="text-2xl font-semibold tracking-tight tabular-nums">
+                {marketplaceKPIs.vendors.value}
+              </div>
+            </div>
+          </div>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            {vendorCategories.map((c) => (
+              <div key={c.name} className="flex items-center gap-2 rounded-lg border border-border p-2 text-[12px]">
+                <span className="h-2 w-2 rounded-full" style={{ background: c.color }} />
+                <span className="text-muted-foreground truncate flex-1">{c.name}</span>
+                <span className="font-semibold tabular-nums">{c.value}%</span>
+              </div>
+            ))}
+          </div>
+        </ChartCard>
       </div>
+
 
       <div className="mt-5 grid grid-cols-1 xl:grid-cols-3 gap-4">
         {/* Vendors table */}
