@@ -19,6 +19,9 @@ import {
   Area,
   AreaChart,
   CartesianGrid,
+  Cell,
+  Pie,
+  PieChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -28,7 +31,6 @@ import { toast } from "sonner";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { MiniStat } from "@/components/dashboard/MiniStat";
 import { ChartCard } from "@/components/dashboard/ChartCard";
-import { PlanDonutChart } from "@/components/dashboard/Charts";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { cn } from "@/lib/utils";
 import {
