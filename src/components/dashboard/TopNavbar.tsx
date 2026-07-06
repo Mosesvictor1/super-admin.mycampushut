@@ -15,7 +15,7 @@ const NOTIFICATIONS = [
   { title: "32 failed payments in last 24h", meta: "Finance · critical", time: "2m" },
   { title: "Premium churn up 4.2% WoW", meta: "Users · warning", time: "18m" },
   { title: "Weekly digest ready", meta: "Reports", time: "1h" },
-  { title: "12 new students from IIT Bombay", meta: "Users", time: "3h" },
+  { title: "12 new students from University of Lagos", meta: "Users", time: "3h" },
 ];
 
 const RANGES = ["Today", "Last 7 days", "Last 30 days", "Last 90 days", "This quarter", "Year to date"];
