@@ -1,4 +1,4 @@
-import { Users, Activity, Wallet, BadgeCheck } from "lucide-react";
+import { Users, Activity, UserCheck, BadgeCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { KPICard } from "@/components/dashboard/KPICard";
@@ -37,8 +37,8 @@ export default function IndexPage() {
         <button className="text-left" onClick={() => navigate("/users")}>
           <KPICard icon={Activity} label="Daily Active Users" value="18,540" delta={8.2} spark={spark(2)} tone="blue" />
         </button>
-        <button className="text-left" onClick={() => navigate("/finance")}>
-          <KPICard icon={Wallet} label="Monthly Revenue" value="₦84,200" delta={15.7} spark={spark(3)} tone="accent" />
+        <button className="text-left" onClick={() => navigate("/users")}>
+          <KPICard icon={UserCheck} label="Monthly Active Users" value="72,840" delta={11.3} spark={spark(3)} tone="accent" />
         </button>
         <button className="text-left" onClick={() => navigate("/finance")}>
           <KPICard icon={BadgeCheck} label="Active Subscriptions" value="3,421" delta={-2.1} spark={spark(4)} tone="violet" />

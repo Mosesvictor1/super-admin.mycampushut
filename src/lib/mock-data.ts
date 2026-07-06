@@ -38,13 +38,13 @@ export const planDistribution = [
 ];
 
 export const topUniversities = [
-  { name: "IIT Bombay", v: 14200 },
-  { name: "BITS Pilani", v: 11800 },
-  { name: "Delhi University", v: 10400 },
-  { name: "IISc Bangalore", v: 9200 },
-  { name: "IIT Madras", v: 8600 },
-  { name: "VIT Vellore", v: 7100 },
-  { name: "NIT Trichy", v: 6300 },
+  { name: "University of Lagos", v: 14200 },
+  { name: "University of Ibadan", v: 11800 },
+  { name: "Obafemi Awolowo University", v: 10400 },
+  { name: "Ahmadu Bello University", v: 9200 },
+  { name: "University of Nigeria, Nsukka", v: 8600 },
+  { name: "Covenant University", v: 7100 },
+  { name: "University of Benin", v: 6300 },
 ];
 
 export const applicationFunnel = [
@@ -85,12 +85,12 @@ export const cohortRetention = [
 ];
 
 export const geoDistribution = [
-  { region: "Delhi NCR", pct: 22, users: 27_593 },
-  { region: "Mumbai", pct: 18, users: 22_575 },
-  { region: "Bangalore", pct: 16, users: 20_067 },
-  { region: "Hyderabad", pct: 11, users: 13_796 },
-  { region: "Chennai", pct: 9, users: 11_287 },
-  { region: "Pune", pct: 8, users: 10_033 },
+  { region: "Lagos", pct: 22, users: 27_593 },
+  { region: "Abuja", pct: 18, users: 22_575 },
+  { region: "Ibadan", pct: 16, users: 20_067 },
+  { region: "Port Harcourt", pct: 11, users: 13_796 },
+  { region: "Benin City", pct: 9, users: 11_287 },
+  { region: "Kano", pct: 8, users: 10_033 },
   { region: "Other", pct: 16, users: 20_069 },
 ];
 
@@ -108,18 +108,18 @@ export const studentRows: {
   lastActive: string;
   status: UserStatus;
 }[] = [
-  { name: "Ananya Sharma", email: "ananya@iitb.ac.in", university: "IIT Bombay", plan: "Premium", lastActive: "2 min ago", status: "Active" },
-  { name: "Karan Mehta", email: "karan@bits.ac.in", university: "BITS Pilani", plan: "Premium", lastActive: "12 min ago", status: "Active" },
-  { name: "Riya Patel", email: "riya@du.ac.in", university: "Delhi University", plan: "Basic", lastActive: "1 hr ago", status: "Active" },
-  { name: "Mohit Verma", email: "mohit@dtu.ac.in", university: "DTU", plan: "Free", lastActive: "3 hr ago", status: "Inactive" },
-  { name: "Sneha Reddy", email: "sneha@iisc.ac.in", university: "IISc Bangalore", plan: "Premium", lastActive: "5 hr ago", status: "Active" },
-  { name: "Arjun Singh", email: "arjun@iitm.ac.in", university: "IIT Madras", plan: "Basic", lastActive: "1 day ago", status: "Suspended" },
-  { name: "Pooja Iyer", email: "pooja@nitt.edu", university: "NIT Trichy", plan: "Basic", lastActive: "2 days ago", status: "Active" },
-  { name: "Vikram Joshi", email: "vikram@vit.ac.in", university: "VIT Vellore", plan: "Free", lastActive: "3 days ago", status: "Inactive" },
-  { name: "Neha Kapoor", email: "neha@iiitd.ac.in", university: "IIIT Delhi", plan: "Premium", lastActive: "20 min ago", status: "Active" },
-  { name: "Rahul Nair", email: "rahul@iitk.ac.in", university: "IIT Kanpur", plan: "Premium", lastActive: "45 min ago", status: "Active" },
-  { name: "Tara Bose", email: "tara@jadav.edu", university: "Jadavpur University", plan: "Basic", lastActive: "6 hr ago", status: "Active" },
-  { name: "Imran Khan", email: "imran@amu.ac.in", university: "AMU", plan: "Free", lastActive: "4 days ago", status: "Suspended" },
+  { name: "Chinedu Okafor", email: "chinedu@unilag.edu.ng", university: "University of Lagos", plan: "Premium", lastActive: "2 min ago", status: "Active" },
+  { name: "Aisha Bello", email: "aisha@abu.edu.ng", university: "Ahmadu Bello University", plan: "Premium", lastActive: "12 min ago", status: "Active" },
+  { name: "Tunde Adebayo", email: "tunde@ui.edu.ng", university: "University of Ibadan", plan: "Basic", lastActive: "1 hr ago", status: "Active" },
+  { name: "Ngozi Eze", email: "ngozi@unn.edu.ng", university: "University of Nigeria, Nsukka", plan: "Free", lastActive: "3 hr ago", status: "Inactive" },
+  { name: "Emeka Nwosu", email: "emeka@oauife.edu.ng", university: "Obafemi Awolowo University", plan: "Premium", lastActive: "5 hr ago", status: "Active" },
+  { name: "Fatima Ibrahim", email: "fatima@buk.edu.ng", university: "Bayero University Kano", plan: "Basic", lastActive: "1 day ago", status: "Suspended" },
+  { name: "Oluwaseun Adeyemi", email: "seun@covenantuniversity.edu.ng", university: "Covenant University", plan: "Basic", lastActive: "2 days ago", status: "Active" },
+  { name: "Chiamaka Obi", email: "chiamaka@uniben.edu", university: "University of Benin", plan: "Free", lastActive: "3 days ago", status: "Inactive" },
+  { name: "Ibrahim Musa", email: "ibrahim@futminna.edu.ng", university: "FUT Minna", plan: "Premium", lastActive: "20 min ago", status: "Active" },
+  { name: "Yetunde Ajayi", email: "yetunde@lasu.edu.ng", university: "Lagos State University", plan: "Premium", lastActive: "45 min ago", status: "Active" },
+  { name: "Kelechi Nnamdi", email: "kelechi@babcock.edu.ng", university: "Babcock University", plan: "Basic", lastActive: "6 hr ago", status: "Active" },
+  { name: "Hauwa Sani", email: "hauwa@unimaid.edu.ng", university: "University of Maiduguri", plan: "Free", lastActive: "4 days ago", status: "Suspended" },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -155,21 +155,21 @@ export const revenueByPlan = [
 ];
 
 export const paymentMethods = [
-  { name: "UPI", value: 46 },
-  { name: "Card", value: 32 },
-  { name: "Netbanking", value: 14 },
+  { name: "Card", value: 46 },
+  { name: "Bank Transfer", value: 32 },
+  { name: "USSD", value: 14 },
   { name: "Wallet", value: 8 },
 ];
 
 export const transactions = [
-  { id: "TX-90214", user: "Ananya Sharma", plan: "Premium" as Plan, amount: 24000, method: "UPI", status: "Success" as const, date: "Today, 09:24" },
-  { id: "TX-90213", user: "Karan Mehta", plan: "Premium" as Plan, amount: 24000, method: "Card", status: "Success" as const, date: "Today, 08:12" },
-  { id: "TX-90212", user: "Riya Patel", plan: "Basic" as Plan, amount: 8000, method: "UPI", status: "Success" as const, date: "Today, 07:58" },
-  { id: "TX-90211", user: "Mohit Verma", plan: "Basic" as Plan, amount: 8000, method: "Card", status: "Failed" as const, date: "Yesterday, 22:41" },
-  { id: "TX-90210", user: "Sneha Reddy", plan: "Premium" as Plan, amount: 24000, method: "Netbanking", status: "Success" as const, date: "Yesterday, 19:03" },
-  { id: "TX-90209", user: "Arjun Singh", plan: "Premium" as Plan, amount: 24000, method: "UPI", status: "Refunded" as const, date: "Yesterday, 14:22" },
-  { id: "TX-90208", user: "Pooja Iyer", plan: "Basic" as Plan, amount: 8000, method: "Wallet", status: "Success" as const, date: "Yesterday, 11:07" },
-  { id: "TX-90207", user: "Neha Kapoor", plan: "Premium" as Plan, amount: 24000, method: "UPI", status: "Success" as const, date: "2 days ago" },
+  { id: "TX-90214", user: "Chinedu Okafor", plan: "Premium" as Plan, amount: 24000, method: "Card", status: "Success" as const, date: "Today, 09:24" },
+  { id: "TX-90213", user: "Aisha Bello", plan: "Premium" as Plan, amount: 24000, method: "Card", status: "Success" as const, date: "Today, 08:12" },
+  { id: "TX-90212", user: "Tunde Adebayo", plan: "Basic" as Plan, amount: 8000, method: "Transfer", status: "Success" as const, date: "Today, 07:58" },
+  { id: "TX-90211", user: "Ngozi Eze", plan: "Basic" as Plan, amount: 8000, method: "Card", status: "Failed" as const, date: "Yesterday, 22:41" },
+  { id: "TX-90210", user: "Emeka Nwosu", plan: "Premium" as Plan, amount: 24000, method: "Transfer", status: "Success" as const, date: "Yesterday, 19:03" },
+  { id: "TX-90209", user: "Fatima Ibrahim", plan: "Premium" as Plan, amount: 24000, method: "Card", status: "Refunded" as const, date: "Yesterday, 14:22" },
+  { id: "TX-90208", user: "Oluwaseun Adeyemi", plan: "Basic" as Plan, amount: 8000, method: "Wallet", status: "Success" as const, date: "Yesterday, 11:07" },
+  { id: "TX-90207", user: "Yetunde Ajayi", plan: "Premium" as Plan, amount: 24000, method: "Card", status: "Success" as const, date: "2 days ago" },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -311,9 +311,9 @@ export const reportsList = [
 ];
 
 export const auditEvents = [
-  { actor: "Aarav Khanna", action: "Updated pricing tier", target: "Plan: Premium", time: "10 min ago" },
-  { actor: "Priya Menon", action: "Exported CSV", target: "Users (all)", time: "42 min ago" },
+  { actor: "Adebayo Ogunleye", action: "Updated pricing tier", target: "Plan: Premium", time: "10 min ago" },
+  { actor: "Chidinma Umeh", action: "Exported CSV", target: "Users (all)", time: "42 min ago" },
   { actor: "System", action: "Auto-backup completed", target: "DB snapshot", time: "3 h ago" },
-  { actor: "Rohit Das", action: "Suspended user", target: "imran@amu.ac.in", time: "5 h ago" },
-  { actor: "Aarav Khanna", action: "Rotated API key", target: "Payments webhook", time: "Yesterday" },
+  { actor: "Ibrahim Danjuma", action: "Suspended user", target: "hauwa@unimaid.edu.ng", time: "5 h ago" },
+  { actor: "Adebayo Ogunleye", action: "Rotated API key", target: "Payments webhook", time: "Yesterday" },
 ];
