@@ -1,4 +1,4 @@
-import { Users, Activity, Wallet, BadgeCheck } from "lucide-react";
+import { Users, Activity, UserCheck, BadgeCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { KPICard } from "@/components/dashboard/KPICard";
