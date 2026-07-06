@@ -317,3 +317,79 @@ export const auditEvents = [
   { actor: "Ibrahim Danjuma", action: "Suspended user", target: "hauwa@unimaid.edu.ng", time: "5 h ago" },
   { actor: "Adebayo Ogunleye", action: "Rotated API key", target: "Payments webhook", time: "Yesterday" },
 ];
+
+/* ------------------------------------------------------------------ */
+/* Marketplace & Vendors                                              */
+/* ------------------------------------------------------------------ */
+
+export type VendorStatus = "Active" | "Pending" | "Suspended";
+export type VendorTier = "Standard" | "Verified" | "Elite";
+
+export const marketplaceKPIs = {
+  gmv: { value: "₦42.8M", delta: 18.9 },
+  vendors: { value: 486, delta: 12.4 },
+  orders: { value: 24_140, delta: 22.1 },
+  takeRate: { value: "8.4%", delta: 0.6 },
+};
+
+export const gmvTrend = [
+  { m: "Apr", gmv: 18.4, orders: 12100 },
+  { m: "May", gmv: 21.2, orders: 13800 },
+  { m: "Jun", gmv: 24.6, orders: 15400 },
+  { m: "Jul", gmv: 27.9, orders: 16900 },
+  { m: "Aug", gmv: 30.4, orders: 18200 },
+  { m: "Sep", gmv: 33.1, orders: 19700 },
+  { m: "Oct", gmv: 36.2, orders: 21100 },
+  { m: "Nov", gmv: 38.8, orders: 22400 },
+  { m: "Dec", gmv: 40.6, orders: 23200 },
+  { m: "Jan", gmv: 41.7, orders: 23700 },
+  { m: "Feb", gmv: 42.2, orders: 23980 },
+  { m: "Mar", gmv: 42.8, orders: 24140 },
+];
+
+export const vendorCategories = [
+  { name: "Textbooks", value: 28, color: "oklch(0.62 0.17 148)" },
+  { name: "Electronics", value: 22, color: "oklch(0.55 0.15 240)" },
+  { name: "Fashion", value: 18, color: "oklch(0.65 0.18 300)" },
+  { name: "Food & Snacks", value: 14, color: "oklch(0.72 0.18 50)" },
+  { name: "Services", value: 10, color: "oklch(0.65 0.16 175)" },
+  { name: "Other", value: 8, color: "oklch(0.70 0.02 250)" },
+];
+
+export const topVendors: {
+  name: string;
+  owner: string;
+  category: string;
+  gmv: number;
+  orders: number;
+  rating: number;
+  tier: VendorTier;
+  status: VendorStatus;
+  joined: string;
+}[] = [
+  { name: "Naija Book Hub", owner: "Chinedu Okafor", category: "Textbooks", gmv: 4_820_000, orders: 2140, rating: 4.9, tier: "Elite", status: "Active", joined: "Jan 2024" },
+  { name: "Campus Tech Store", owner: "Aisha Bello", category: "Electronics", gmv: 3_940_000, orders: 1620, rating: 4.8, tier: "Verified", status: "Active", joined: "Mar 2024" },
+  { name: "Ankara Threads", owner: "Yetunde Ajayi", category: "Fashion", gmv: 2_610_000, orders: 1840, rating: 4.7, tier: "Verified", status: "Active", joined: "May 2024" },
+  { name: "Jollof Express", owner: "Emeka Nwosu", category: "Food & Snacks", gmv: 1_980_000, orders: 3120, rating: 4.6, tier: "Standard", status: "Active", joined: "Jun 2024" },
+  { name: "Lagos Print Works", owner: "Tunde Adebayo", category: "Services", gmv: 1_420_000, orders: 980, rating: 4.5, tier: "Standard", status: "Active", joined: "Aug 2024" },
+  { name: "Naija Gadgets Co.", owner: "Ibrahim Musa", category: "Electronics", gmv: 1_180_000, orders: 640, rating: 4.4, tier: "Verified", status: "Pending", joined: "Feb 2026" },
+  { name: "Sabi Notes", owner: "Ngozi Eze", category: "Textbooks", gmv: 940_000, orders: 720, rating: 4.3, tier: "Standard", status: "Active", joined: "Sep 2024" },
+  { name: "Kampus Kicks", owner: "Kelechi Nnamdi", category: "Fashion", gmv: 820_000, orders: 540, rating: 4.2, tier: "Standard", status: "Active", joined: "Nov 2024" },
+  { name: "Quick Print NG", owner: "Oluwaseun Adeyemi", category: "Services", gmv: 610_000, orders: 420, rating: 4.1, tier: "Standard", status: "Suspended", joined: "Oct 2024" },
+  { name: "Zaria Snacks", owner: "Fatima Ibrahim", category: "Food & Snacks", gmv: 480_000, orders: 890, rating: 4.0, tier: "Standard", status: "Pending", joined: "Feb 2026" },
+];
+
+export const marketplaceOrders = [
+  { id: "OR-58120", buyer: "Chiamaka Obi", vendor: "Naija Book Hub", items: 3, amount: 18400, status: "Delivered" as const, date: "Today, 10:12" },
+  { id: "OR-58119", buyer: "Hauwa Sani", vendor: "Ankara Threads", items: 1, amount: 12500, status: "Shipped" as const, date: "Today, 09:41" },
+  { id: "OR-58118", buyer: "Ibrahim Musa", vendor: "Campus Tech Store", items: 2, amount: 96000, status: "Processing" as const, date: "Today, 08:20" },
+  { id: "OR-58117", buyer: "Aisha Bello", vendor: "Jollof Express", items: 4, amount: 6800, status: "Delivered" as const, date: "Yesterday, 20:14" },
+  { id: "OR-58116", buyer: "Emeka Nwosu", vendor: "Lagos Print Works", items: 1, amount: 3500, status: "Cancelled" as const, date: "Yesterday, 16:02" },
+  { id: "OR-58115", buyer: "Yetunde Ajayi", vendor: "Sabi Notes", items: 2, amount: 5200, status: "Delivered" as const, date: "Yesterday, 12:47" },
+];
+
+export const pendingVendors = [
+  { name: "Naija Gadgets Co.", owner: "Ibrahim Musa", category: "Electronics", submitted: "2 days ago" },
+  { name: "Zaria Snacks", owner: "Fatima Ibrahim", category: "Food & Snacks", submitted: "3 days ago" },
+  { name: "Enugu Craft House", owner: "Ngozi Eze", category: "Fashion", submitted: "5 days ago" },
+];
