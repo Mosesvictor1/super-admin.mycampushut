@@ -155,9 +155,9 @@ export const revenueByPlan = [
 ];
 
 export const paymentMethods = [
-  { name: "UPI", value: 46 },
-  { name: "Card", value: 32 },
-  { name: "Netbanking", value: 14 },
+  { name: "Card", value: 46 },
+  { name: "Bank Transfer", value: 32 },
+  { name: "USSD", value: 14 },
   { name: "Wallet", value: 8 },
 ];
 
