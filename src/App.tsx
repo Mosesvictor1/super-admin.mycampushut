@@ -5,6 +5,7 @@ import UsersInsightsPage from "./pages/UsersInsights";
 import FinancePage from "./pages/Finance";
 import JobsPage from "./pages/Jobs";
 import AssignmentsPage from "./pages/Assignments";
+import MarketplacePage from "./pages/Marketplace";
 import AiCoursesPage from "./pages/AiCourses";
 import LibraryPage from "./pages/Library";
 import ReportsPage from "./pages/Reports";
@@ -20,6 +21,7 @@ export default function App() {
       <Route path="/finance" element={<FinancePage />} />
       <Route path="/jobs" element={<JobsPage />} />
       <Route path="/assignments" element={<AssignmentsPage />} />
+      <Route path="/marketplace" element={<MarketplacePage />} />
       <Route path="/ai-courses" element={<AiCoursesPage />} />
       <Route path="/library" element={<LibraryPage />} />
       <Route path="/reports" element={<ReportsPage />} />
