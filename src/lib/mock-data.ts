@@ -85,12 +85,12 @@ export const cohortRetention = [
 ];
 
 export const geoDistribution = [
-  { region: "Delhi NCR", pct: 22, users: 27_593 },
-  { region: "Mumbai", pct: 18, users: 22_575 },
-  { region: "Bangalore", pct: 16, users: 20_067 },
-  { region: "Hyderabad", pct: 11, users: 13_796 },
-  { region: "Chennai", pct: 9, users: 11_287 },
-  { region: "Pune", pct: 8, users: 10_033 },
+  { region: "Lagos", pct: 22, users: 27_593 },
+  { region: "Abuja", pct: 18, users: 22_575 },
+  { region: "Ibadan", pct: 16, users: 20_067 },
+  { region: "Port Harcourt", pct: 11, users: 13_796 },
+  { region: "Benin City", pct: 9, users: 11_287 },
+  { region: "Kano", pct: 8, users: 10_033 },
   { region: "Other", pct: 16, users: 20_069 },
 ];
 
