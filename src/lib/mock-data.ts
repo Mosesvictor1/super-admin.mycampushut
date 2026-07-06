@@ -108,18 +108,18 @@ export const studentRows: {
   lastActive: string;
   status: UserStatus;
 }[] = [
-  { name: "Ananya Sharma", email: "ananya@iitb.ac.in", university: "IIT Bombay", plan: "Premium", lastActive: "2 min ago", status: "Active" },
-  { name: "Karan Mehta", email: "karan@bits.ac.in", university: "BITS Pilani", plan: "Premium", lastActive: "12 min ago", status: "Active" },
-  { name: "Riya Patel", email: "riya@du.ac.in", university: "Delhi University", plan: "Basic", lastActive: "1 hr ago", status: "Active" },
-  { name: "Mohit Verma", email: "mohit@dtu.ac.in", university: "DTU", plan: "Free", lastActive: "3 hr ago", status: "Inactive" },
-  { name: "Sneha Reddy", email: "sneha@iisc.ac.in", university: "IISc Bangalore", plan: "Premium", lastActive: "5 hr ago", status: "Active" },
-  { name: "Arjun Singh", email: "arjun@iitm.ac.in", university: "IIT Madras", plan: "Basic", lastActive: "1 day ago", status: "Suspended" },
-  { name: "Pooja Iyer", email: "pooja@nitt.edu", university: "NIT Trichy", plan: "Basic", lastActive: "2 days ago", status: "Active" },
-  { name: "Vikram Joshi", email: "vikram@vit.ac.in", university: "VIT Vellore", plan: "Free", lastActive: "3 days ago", status: "Inactive" },
-  { name: "Neha Kapoor", email: "neha@iiitd.ac.in", university: "IIIT Delhi", plan: "Premium", lastActive: "20 min ago", status: "Active" },
-  { name: "Rahul Nair", email: "rahul@iitk.ac.in", university: "IIT Kanpur", plan: "Premium", lastActive: "45 min ago", status: "Active" },
-  { name: "Tara Bose", email: "tara@jadav.edu", university: "Jadavpur University", plan: "Basic", lastActive: "6 hr ago", status: "Active" },
-  { name: "Imran Khan", email: "imran@amu.ac.in", university: "AMU", plan: "Free", lastActive: "4 days ago", status: "Suspended" },
+  { name: "Chinedu Okafor", email: "chinedu@unilag.edu.ng", university: "University of Lagos", plan: "Premium", lastActive: "2 min ago", status: "Active" },
+  { name: "Aisha Bello", email: "aisha@abu.edu.ng", university: "Ahmadu Bello University", plan: "Premium", lastActive: "12 min ago", status: "Active" },
+  { name: "Tunde Adebayo", email: "tunde@ui.edu.ng", university: "University of Ibadan", plan: "Basic", lastActive: "1 hr ago", status: "Active" },
+  { name: "Ngozi Eze", email: "ngozi@unn.edu.ng", university: "University of Nigeria, Nsukka", plan: "Free", lastActive: "3 hr ago", status: "Inactive" },
+  { name: "Emeka Nwosu", email: "emeka@oauife.edu.ng", university: "Obafemi Awolowo University", plan: "Premium", lastActive: "5 hr ago", status: "Active" },
+  { name: "Fatima Ibrahim", email: "fatima@buk.edu.ng", university: "Bayero University Kano", plan: "Basic", lastActive: "1 day ago", status: "Suspended" },
+  { name: "Oluwaseun Adeyemi", email: "seun@covenantuniversity.edu.ng", university: "Covenant University", plan: "Basic", lastActive: "2 days ago", status: "Active" },
+  { name: "Chiamaka Obi", email: "chiamaka@uniben.edu", university: "University of Benin", plan: "Free", lastActive: "3 days ago", status: "Inactive" },
+  { name: "Ibrahim Musa", email: "ibrahim@futminna.edu.ng", university: "FUT Minna", plan: "Premium", lastActive: "20 min ago", status: "Active" },
+  { name: "Yetunde Ajayi", email: "yetunde@lasu.edu.ng", university: "Lagos State University", plan: "Premium", lastActive: "45 min ago", status: "Active" },
+  { name: "Kelechi Nnamdi", email: "kelechi@babcock.edu.ng", university: "Babcock University", plan: "Basic", lastActive: "6 hr ago", status: "Active" },
+  { name: "Hauwa Sani", email: "hauwa@unimaid.edu.ng", university: "University of Maiduguri", plan: "Free", lastActive: "4 days ago", status: "Suspended" },
 ];
 
 /* ------------------------------------------------------------------ */
