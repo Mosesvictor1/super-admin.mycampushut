@@ -311,9 +311,9 @@ export const reportsList = [
 ];
 
 export const auditEvents = [
-  { actor: "Aarav Khanna", action: "Updated pricing tier", target: "Plan: Premium", time: "10 min ago" },
-  { actor: "Priya Menon", action: "Exported CSV", target: "Users (all)", time: "42 min ago" },
+  { actor: "Adebayo Ogunleye", action: "Updated pricing tier", target: "Plan: Premium", time: "10 min ago" },
+  { actor: "Chidinma Umeh", action: "Exported CSV", target: "Users (all)", time: "42 min ago" },
   { actor: "System", action: "Auto-backup completed", target: "DB snapshot", time: "3 h ago" },
-  { actor: "Rohit Das", action: "Suspended user", target: "imran@amu.ac.in", time: "5 h ago" },
-  { actor: "Aarav Khanna", action: "Rotated API key", target: "Payments webhook", time: "Yesterday" },
+  { actor: "Ibrahim Danjuma", action: "Suspended user", target: "hauwa@unimaid.edu.ng", time: "5 h ago" },
+  { actor: "Adebayo Ogunleye", action: "Rotated API key", target: "Payments webhook", time: "Yesterday" },
 ];
