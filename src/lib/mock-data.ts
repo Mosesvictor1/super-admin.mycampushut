@@ -38,13 +38,13 @@ export const planDistribution = [
 ];
 
 export const topUniversities = [
-  { name: "IIT Bombay", v: 14200 },
-  { name: "BITS Pilani", v: 11800 },
-  { name: "Delhi University", v: 10400 },
-  { name: "IISc Bangalore", v: 9200 },
-  { name: "IIT Madras", v: 8600 },
-  { name: "VIT Vellore", v: 7100 },
-  { name: "NIT Trichy", v: 6300 },
+  { name: "University of Lagos", v: 14200 },
+  { name: "University of Ibadan", v: 11800 },
+  { name: "Obafemi Awolowo University", v: 10400 },
+  { name: "Ahmadu Bello University", v: 9200 },
+  { name: "University of Nigeria, Nsukka", v: 8600 },
+  { name: "Covenant University", v: 7100 },
+  { name: "University of Benin", v: 6300 },
 ];
 
 export const applicationFunnel = [
