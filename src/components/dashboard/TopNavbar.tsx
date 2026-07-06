@@ -142,7 +142,7 @@ export function TopNavbar({ title, subtitle }: { title: string; subtitle?: strin
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>
-              <div className="font-semibold">Aarav Khanna</div>
+              <div className="font-semibold">Adebayo Ogunleye</div>
               <div className="text-[11px] font-normal text-muted-foreground">admin@campushut.io</div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
