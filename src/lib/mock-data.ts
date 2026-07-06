@@ -162,14 +162,14 @@ export const paymentMethods = [
 ];
 
 export const transactions = [
-  { id: "TX-90214", user: "Ananya Sharma", plan: "Premium" as Plan, amount: 24000, method: "UPI", status: "Success" as const, date: "Today, 09:24" },
-  { id: "TX-90213", user: "Karan Mehta", plan: "Premium" as Plan, amount: 24000, method: "Card", status: "Success" as const, date: "Today, 08:12" },
-  { id: "TX-90212", user: "Riya Patel", plan: "Basic" as Plan, amount: 8000, method: "UPI", status: "Success" as const, date: "Today, 07:58" },
-  { id: "TX-90211", user: "Mohit Verma", plan: "Basic" as Plan, amount: 8000, method: "Card", status: "Failed" as const, date: "Yesterday, 22:41" },
-  { id: "TX-90210", user: "Sneha Reddy", plan: "Premium" as Plan, amount: 24000, method: "Netbanking", status: "Success" as const, date: "Yesterday, 19:03" },
-  { id: "TX-90209", user: "Arjun Singh", plan: "Premium" as Plan, amount: 24000, method: "UPI", status: "Refunded" as const, date: "Yesterday, 14:22" },
-  { id: "TX-90208", user: "Pooja Iyer", plan: "Basic" as Plan, amount: 8000, method: "Wallet", status: "Success" as const, date: "Yesterday, 11:07" },
-  { id: "TX-90207", user: "Neha Kapoor", plan: "Premium" as Plan, amount: 24000, method: "UPI", status: "Success" as const, date: "2 days ago" },
+  { id: "TX-90214", user: "Chinedu Okafor", plan: "Premium" as Plan, amount: 24000, method: "Card", status: "Success" as const, date: "Today, 09:24" },
+  { id: "TX-90213", user: "Aisha Bello", plan: "Premium" as Plan, amount: 24000, method: "Card", status: "Success" as const, date: "Today, 08:12" },
+  { id: "TX-90212", user: "Tunde Adebayo", plan: "Basic" as Plan, amount: 8000, method: "Transfer", status: "Success" as const, date: "Today, 07:58" },
+  { id: "TX-90211", user: "Ngozi Eze", plan: "Basic" as Plan, amount: 8000, method: "Card", status: "Failed" as const, date: "Yesterday, 22:41" },
+  { id: "TX-90210", user: "Emeka Nwosu", plan: "Premium" as Plan, amount: 24000, method: "Transfer", status: "Success" as const, date: "Yesterday, 19:03" },
+  { id: "TX-90209", user: "Fatima Ibrahim", plan: "Premium" as Plan, amount: 24000, method: "Card", status: "Refunded" as const, date: "Yesterday, 14:22" },
+  { id: "TX-90208", user: "Oluwaseun Adeyemi", plan: "Basic" as Plan, amount: 8000, method: "Wallet", status: "Success" as const, date: "Yesterday, 11:07" },
+  { id: "TX-90207", user: "Yetunde Ajayi", plan: "Premium" as Plan, amount: 24000, method: "Card", status: "Success" as const, date: "2 days ago" },
 ];
 
 /* ------------------------------------------------------------------ */
