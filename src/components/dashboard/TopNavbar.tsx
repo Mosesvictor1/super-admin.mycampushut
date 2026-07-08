@@ -1,4 +1,4 @@
-import { Bell, Calendar, ChevronDown, Download, Search, Command } from "lucide-react";
+import { Bell, Calendar, CalendarRange, ChevronDown, Download, Search, Command } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
@@ -20,15 +20,37 @@ const NOTIFICATIONS = [
 
 const RANGES = ["Today", "Last 7 days", "Last 30 days", "Last 90 days", "This quarter", "Year to date"];
 
+function formatCustomLabel(start: string, end: string) {
+  if (!start || !end) return "Custom range";
+  const fmt = (d: string) =>
+    new Date(`${d}T00:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return `${fmt(start)} – ${fmt(end)}`;
+}
+
 export function TopNavbar({ title, subtitle }: { title: string; subtitle?: string }) {
   const navigate = useNavigate();
   const [range, setRange] = useState("Last 30 days");
   const [q, setQ] = useState("");
 
+  // Date range dropdown state
+  const [dateOpen, setDateOpen] = useState(false);
+  const [customMode, setCustomMode] = useState(false);
+  const [customStart, setCustomStart] = useState("");
+  const [customEnd, setCustomEnd] = useState("");
+  const dateError = customStart && customEnd && customStart > customEnd;
+
   const onSearch = (e: FormEvent) => {
     e.preventDefault();
     if (!q.trim()) return;
     toast(`Searching "${q}"…`, { description: "Global search is a preview in this demo." });
+  };
+
+  const applyCustomRange = () => {
+    if (!customStart || !customEnd || dateError) return;
+    setRange(formatCustomLabel(customStart, customEnd));
+    toast.success(`Range set to ${formatCustomLabel(customStart, customEnd)}`);
+    setDateOpen(false);
+    setCustomMode(false);
   };
 
   return (
@@ -59,7 +81,13 @@ export function TopNavbar({ title, subtitle }: { title: string; subtitle?: strin
           </kbd>
         </form>
 
-        <DropdownMenu>
+        <DropdownMenu
+          open={dateOpen}
+          onOpenChange={(o) => {
+            setDateOpen(o);
+            if (!o) setCustomMode(false);
+          }}
+        >
           <DropdownMenuTrigger asChild>
             <button className="hidden lg:inline-flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-2 text-sm font-medium shadow-soft hover:border-primary/40 transition">
               <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -67,20 +95,91 @@ export function TopNavbar({ title, subtitle }: { title: string; subtitle?: strin
               <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuLabel>Date range</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {RANGES.map((r) => (
-              <DropdownMenuItem
-                key={r}
-                onClick={() => {
-                  setRange(r);
-                  toast.success(`Range set to ${r}`);
-                }}
+          <DropdownMenuContent align="end" className={customMode ? "w-72" : "w-48"}>
+            {!customMode && (
+              <>
+                <DropdownMenuLabel>Date range</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {RANGES.map((r) => (
+                  <DropdownMenuItem
+                    key={r}
+                    onClick={() => {
+                      setRange(r);
+                      toast.success(`Range set to ${r}`);
+                    }}
+                  >
+                    {r}
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    setCustomMode(true);
+                  }}
+                  className="gap-2"
+                >
+                  <CalendarRange className="h-3.5 w-3.5 text-muted-foreground" />
+                  Custom range…
+                </DropdownMenuItem>
+              </>
+            )}
+
+            {customMode && (
+              <div
+                className="p-1"
+                onKeyDown={(e) => e.stopPropagation()}
               >
-                {r}
-              </DropdownMenuItem>
-            ))}
+                <DropdownMenuLabel className="flex items-center gap-2">
+                  <CalendarRange className="h-3.5 w-3.5 text-muted-foreground" />
+                  Custom range
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <div className="flex flex-col gap-2.5 px-2 py-2">
+                  <label className="flex flex-col gap-1 text-[12px] font-medium text-muted-foreground">
+                    Start date
+                    <input
+                      type="date"
+                      value={customStart}
+                      max={customEnd || undefined}
+                      onChange={(e) => setCustomStart(e.target.value)}
+                      className="rounded-lg border border-border bg-card px-2.5 py-1.5 text-sm text-foreground outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/15"
+                    />
+                  </label>
+                  <label className="flex flex-col gap-1 text-[12px] font-medium text-muted-foreground">
+                    End date
+                    <input
+                      type="date"
+                      value={customEnd}
+                      min={customStart || undefined}
+                      onChange={(e) => setCustomEnd(e.target.value)}
+                      className="rounded-lg border border-border bg-card px-2.5 py-1.5 text-sm text-foreground outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/15"
+                    />
+                  </label>
+                  {dateError && (
+                    <div className="text-[11px] text-destructive">
+                      Start date must be before end date.
+                    </div>
+                  )}
+                </div>
+                <DropdownMenuSeparator />
+                <div className="flex items-center justify-between gap-2 px-1 pt-1">
+                  <button
+                    onClick={() => setCustomMode(false)}
+                    className="rounded-lg px-2.5 py-1.5 text-[13px] font-medium text-muted-foreground hover:bg-muted/60 transition"
+                  >
+                    Back
+                  </button>
+                  <button
+                    onClick={applyCustomRange}
+                    disabled={!customStart || !customEnd || !!dateError}
+                    className="rounded-lg bg-primary px-3 py-1.5 text-[13px] font-medium text-primary-foreground shadow-soft hover:brightness-110 transition disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100"
+                  >
+                    Apply
+                  </button>
+                </div>
+              </div>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
 
