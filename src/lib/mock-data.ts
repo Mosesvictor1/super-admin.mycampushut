@@ -393,3 +393,165 @@ export const pendingVendors = [
   { name: "Zaria Snacks", owner: "Fatima Ibrahim", category: "Food & Snacks", submitted: "3 days ago" },
   { name: "Enugu Craft House", owner: "Ngozi Eze", category: "Fashion", submitted: "5 days ago" },
 ];
+
+/* ------------------------------------------------------------------ */
+/* News & Blog Post                                                   */
+/* ------------------------------------------------------------------ */
+
+export interface BlogPost {
+  id: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  author: string;
+  category: "News" | "Blog";
+  status: "Published" | "Draft";
+  publishedAt: string;
+  views: number;
+  likes: number;
+  coverImage: string;
+}
+
+export const initialBlogPosts: BlogPost[] = [
+  {
+    id: "post-1",
+    title: "CampusHut Launches New AI Study Companion",
+    excerpt: "We are excited to announce the launch of our new AI-powered study companion to help students learn faster and smarter.",
+    content: "Today, CampusHut is taking a giant leap forward in student productivity. We have integrated state-of-the-art LLMs to create an interactive study partner available 24/7. Students can upload their course materials, generate custom quizzes, and get explanations of complex topics instantly. Early beta tests showed a 40% improvement in exam preparation speed...",
+    author: "Adebayo Ogunleye",
+    category: "News",
+    status: "Published",
+    publishedAt: "2026-07-05",
+    views: 1240,
+    likes: 312,
+    coverImage: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=60"
+  },
+  {
+    id: "post-2",
+    title: "How to Manage Your Finances in University",
+    excerpt: "A practical guide for college students on budgeting, saving money, and using CampusHut discounts.",
+    content: "Finances in university can be stressful. Between textbooks, tuition, rent, and socializing, it is easy to run out of cash before the semester ends. In this article, we outline five key budgeting frameworks tailored specifically for Nigerian students. We also show how to leverage the CampusHut marketplace to find deals on shared student accommodation and textbooks...",
+    author: "Sarah Johnson",
+    category: "Blog",
+    status: "Published",
+    publishedAt: "2026-07-01",
+    views: 890,
+    likes: 215,
+    coverImage: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=800&auto=format&fit=crop&q=60"
+  },
+  {
+    id: "post-3",
+    title: "Top 10 Internship Opportunities for Summer 2026",
+    excerpt: "Discover the highest-paying and most student-friendly remote internships available on CampusHut Jobs.",
+    content: "Summer is just around the corner, and securing an internship is the best way to kickstart your career. We have partnered with top tech companies and consulting firms to list exclusive internship openings directly on our portal. Here is a curated list of the top ten roles, including qualifications, pay ranges, and tips on how to polish your resume to stand out...",
+    author: "Michael Okeke",
+    category: "Blog",
+    status: "Draft",
+    publishedAt: "2026-07-07",
+    views: 0,
+    likes: 0,
+    coverImage: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&auto=format&fit=crop&q=60"
+  }
+];
+
+/* ------------------------------------------------------------------ */
+/* Brand Ads                                                          */
+/* ------------------------------------------------------------------ */
+
+export type AdPlacement = "Dashboard Banner" | "Sidebar Ad" | "Job Board Sponsor" | "Marketplace Special";
+export type AdStatus = "Active" | "Scheduled" | "Ended";
+
+export interface BrandAd {
+  id: string;
+  companyName: string;
+  campaignTitle: string;
+  placement: AdPlacement;
+  status: AdStatus;
+  budget: number;
+  spent: number;
+  impressions: number;
+  clicks: number;
+  startDate: string;
+  endDate: string;
+  targetAudience: string;
+  imageUrl: string;
+  linkUrl: string;
+}
+
+export const initialBrandAds: BrandAd[] = [
+  {
+    id: "ad-1",
+    companyName: "Paystack",
+    campaignTitle: "Student Developer Account Launch",
+    placement: "Dashboard Banner",
+    status: "Active",
+    budget: 500000,
+    spent: 320000,
+    impressions: 45000,
+    clicks: 3800,
+    startDate: "2026-06-01",
+    endDate: "2026-08-01",
+    targetAudience: "Computer Science & Engineering Students",
+    imageUrl: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&auto=format&fit=crop&q=60",
+    linkUrl: "https://paystack.com"
+  },
+  {
+    id: "ad-2",
+    companyName: "PiggyVest",
+    campaignTitle: "Target Savings Challenge for Students",
+    placement: "Sidebar Ad",
+    status: "Active",
+    budget: 750000,
+    spent: 150000,
+    impressions: 120000,
+    clicks: 8400,
+    startDate: "2026-07-01",
+    endDate: "2026-10-01",
+    targetAudience: "All students (Focus: Finance)",
+    imageUrl: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=800&auto=format&fit=crop&q=60",
+    linkUrl: "https://piggyvest.com"
+  },
+  {
+    id: "ad-3",
+    companyName: "MTN Nigeria",
+    campaignTitle: "Pulse Pulse Pulse - Student Data Bundle Deals",
+    placement: "Marketplace Special",
+    status: "Scheduled",
+    budget: 1200000,
+    spent: 0,
+    impressions: 0,
+    clicks: 0,
+    startDate: "2026-07-15",
+    endDate: "2026-09-15",
+    targetAudience: "Ages 16-25, heavy data users",
+    imageUrl: "https://images.unsplash.com/photo-1610484826967-09c5720778c7?w=800&auto=format&fit=crop&q=60",
+    linkUrl: "https://mtn.ng"
+  },
+  {
+    id: "ad-4",
+    companyName: "AltSchool Africa",
+    campaignTitle: "Learn Software Engineering - 20% Off Tuition",
+    placement: "Job Board Sponsor",
+    status: "Ended",
+    budget: 400000,
+    spent: 400000,
+    impressions: 89000,
+    clicks: 5200,
+    startDate: "2026-04-01",
+    endDate: "2026-06-30",
+    targetAudience: "Final year students, job seekers",
+    imageUrl: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&auto=format&fit=crop&q=60",
+    linkUrl: "https://altschoolafrica.com"
+  }
+];
+
+export const adPerformanceTrend = [
+  { day: "Mon", impressions: 18000, clicks: 1240 },
+  { day: "Tue", impressions: 22000, clicks: 1530 },
+  { day: "Wed", impressions: 24500, clicks: 1890 },
+  { day: "Thu", impressions: 28000, clicks: 2100 },
+  { day: "Fri", impressions: 32000, clicks: 2420 },
+  { day: "Sat", impressions: 21000, clicks: 1560 },
+  { day: "Sun", impressions: 19500, clicks: 1480 },
+];
+

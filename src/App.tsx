@@ -8,6 +8,8 @@ import AssignmentsPage from "./pages/Assignments";
 import MarketplacePage from "./pages/Marketplace";
 import AiCoursesPage from "./pages/AiCourses";
 import LibraryPage from "./pages/Library";
+import NewsBlogPage from "./pages/NewsBlog";
+import BrandPage from "./pages/Brand";
 import ReportsPage from "./pages/Reports";
 import SettingsPage from "./pages/Settings";
 import NotFoundPage from "./pages/NotFound";
@@ -24,6 +26,8 @@ export default function App() {
       <Route path="/marketplace" element={<MarketplacePage />} />
       <Route path="/ai-courses" element={<AiCoursesPage />} />
       <Route path="/library" element={<LibraryPage />} />
+      <Route path="/news-blog" element={<NewsBlogPage />} />
+      <Route path="/brand" element={<BrandPage />} />
       <Route path="/reports" element={<ReportsPage />} />
       <Route path="/settings" element={<SettingsPage />} />
       <Route path="*" element={<NotFoundPage />} />

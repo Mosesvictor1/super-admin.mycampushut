@@ -15,6 +15,8 @@ import {
   LogOut,
   ShieldCheck,
   GraduationCap,
+  Newspaper,
+  Megaphone,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -30,6 +32,8 @@ const NAV = [
   { to: "/marketplace", label: "Marketplace", icon: Store },
   { to: "/ai-courses", label: "AI Courses", icon: Sparkles },
   { to: "/library", label: "Learning Library", icon: BookOpen },
+  { to: "/news-blog", label: "News & Blog", icon: Newspaper },
+  { to: "/brand", label: "Brand Ads", icon: Megaphone },
   { to: "/reports", label: "Reports", icon: FileBarChart },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
