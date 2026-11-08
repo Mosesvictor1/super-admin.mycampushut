@@ -10,7 +10,6 @@ import LibraryPage from "./pages/Library";
 import NewsBlogPage from "./pages/NewsBlog";
 import BrandPage from "./pages/Brand";
 import ReportsPage from "./pages/Reports";
-import SettingsPage from "./pages/Settings";
 import NotFoundPage from "./pages/NotFound";
 import { dashboardModules } from "./lib/dashboard-modules";
 
@@ -19,10 +18,7 @@ export default function App() {
 
   return (
     <Routes>
-      <Route
-        path="/"
-        element={dashboardModules.platform ? <PlatformPage /> : <Navigate to="/settings" replace />}
-      />
+      <Route path="/" element={dashboardModules.platform ? <PlatformPage /> : <NotFoundPage />} />
       <Route
         path="/platform"
         element={dashboardModules.platform ? <PlatformPage /> : unavailable}
@@ -49,7 +45,7 @@ export default function App() {
       />
       <Route path="/brand" element={dashboardModules.brand ? <BrandPage /> : unavailable} />
       <Route path="/reports" element={dashboardModules.reports ? <ReportsPage /> : unavailable} />
-      <Route path="/settings" element={<SettingsPage />} />
+      <Route path="/settings" element={<Navigate to="/" replace />} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );

@@ -9,7 +9,6 @@ import {
   Sparkles,
   BookOpen,
   FileBarChart,
-  Settings,
   Store,
   ChevronsLeft,
   LogOut,
@@ -37,7 +36,6 @@ const NAV = [
   { to: "/news-blog", label: "News & Blog", icon: Newspaper, module: "newsBlog" },
   { to: "/brand", label: "Brand Ads", icon: Megaphone, module: "brand" },
   { to: "/reports", label: "Reports", icon: FileBarChart, module: "reports" },
-  { to: "/settings", label: "Settings", icon: Settings },
 ] satisfies {
   to: string;
   label: string;
@@ -111,8 +109,7 @@ export function Sidebar() {
       </nav>
 
       <div className="border-t border-sidebar-border p-3">
-        <Link
-          to="/settings"
+        <div
           className={cn(
             "flex items-center gap-3 rounded-xl p-2 transition-colors",
             !collapsed && "bg-[oklch(0.30_0.05_155_/_0.6)] hover:bg-[oklch(0.34_0.05_155_/_0.7)]",
@@ -147,7 +144,7 @@ export function Sidebar() {
               <LogOut className="h-4 w-4" />
             </button>
           )}
-        </Link>
+        </div>
         <button
           onClick={() => setCollapsed((c) => !c)}
           className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg py-1.5 text-[11px] text-sidebar-muted hover:bg-[oklch(0.30_0.05_155)] hover:text-white transition-colors"

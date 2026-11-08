@@ -1,5 +1,4 @@
-import { Bell, Calendar, CalendarRange, ChevronDown, Download, Search, Command } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Calendar, CalendarRange, ChevronDown, Download, Search, Command } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import {
@@ -11,15 +10,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useDashboardDateRange } from "./dashboard-date-range-context";
+import { downloadDashboardWorkbook, type DashboardExportData } from "@/lib/dashboard-export";
 
-const NOTIFICATIONS = [
-  { title: "32 failed payments in last 24h", meta: "Finance · critical", time: "2m" },
-  { title: "Premium churn up 4.2% WoW", meta: "Users · warning", time: "18m" },
-  { title: "Weekly digest ready", meta: "Reports", time: "1h" },
-  { title: "12 new students from University of Lagos", meta: "Users", time: "3h" },
+const RANGES = [
+  "Today",
+  "Last 7 days",
+  "Last 30 days",
+  "Last 90 days",
+  "This quarter",
+  "Year to date",
 ];
-
-const RANGES = ["Today", "Last 7 days", "Last 30 days", "Last 90 days", "This quarter", "Year to date"];
 
 function formatCustomLabel(start: string, end: string) {
   if (!start || !end) return "Custom range";
@@ -64,10 +64,18 @@ function getRangeFilters(range: string) {
   return { startDate: formatDateInput(start), endDate: formatDateInput(end) };
 }
 
-export function TopNavbar({ title, subtitle }: { title: string; subtitle?: string }) {
-  const navigate = useNavigate();
+export function TopNavbar({
+  title,
+  subtitle,
+  exportData,
+}: {
+  title: string;
+  subtitle?: string;
+  exportData?: DashboardExportData | (() => Promise<DashboardExportData>);
+}) {
   const { range, filters, setDateRange } = useDashboardDateRange();
   const [q, setQ] = useState("");
+  const [isExporting, setIsExporting] = useState(false);
 
   // Date range dropdown state
   const [dateOpen, setDateOpen] = useState(false);
@@ -80,6 +88,22 @@ export function TopNavbar({ title, subtitle }: { title: string; subtitle?: strin
     e.preventDefault();
     if (!q.trim()) return;
     toast(`Searching "${q}"…`, { description: "Global search is a preview in this demo." });
+  };
+
+  const exportDashboard = async () => {
+    if (!exportData || isExporting) return;
+    setIsExporting(true);
+    try {
+      const workbookData = typeof exportData === "function" ? await exportData() : exportData;
+      await downloadDashboardWorkbook(workbookData);
+      toast.success("Excel workbook downloaded");
+    } catch (error) {
+      toast.error("Could not export dashboard data", {
+        description: error instanceof Error ? error.message : "An unexpected error occurred.",
+      });
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const applyCustomRange = () => {
@@ -100,9 +124,7 @@ export function TopNavbar({ title, subtitle }: { title: string; subtitle?: strin
           <div className="text-[15px] font-semibold tracking-tight text-foreground truncate">
             {title}
           </div>
-          {subtitle && (
-            <div className="text-[12px] text-muted-foreground truncate">{subtitle}</div>
-          )}
+          {subtitle && <div className="text-[12px] text-muted-foreground truncate">{subtitle}</div>}
         </div>
 
         <form
@@ -168,10 +190,7 @@ export function TopNavbar({ title, subtitle }: { title: string; subtitle?: strin
             )}
 
             {customMode && (
-              <div
-                className="p-1"
-                onKeyDown={(e) => e.stopPropagation()}
-              >
+              <div className="p-1" onKeyDown={(e) => e.stopPropagation()}>
                 <DropdownMenuLabel className="flex items-center gap-2">
                   <CalendarRange className="h-3.5 w-3.5 text-muted-foreground" />
                   Custom range
@@ -226,51 +245,16 @@ export function TopNavbar({ title, subtitle }: { title: string; subtitle?: strin
         </DropdownMenu>
 
         <button
-          onClick={() => {
-            toast.success("Export queued", {
-              description: "You'll get an email with the CSV in a moment.",
-            });
-          }}
-          className="inline-flex items-center gap-2 rounded-xl bg-primary px-3.5 py-2 text-sm font-medium text-primary-foreground shadow-[0_8px_24px_-8px_oklch(0.62_0.17_148_/_0.6)] hover:brightness-110 transition"
+          onClick={() => void exportDashboard()}
+          disabled={!exportData || isExporting}
+          title={
+            !exportData ? "No dashboard data is available to export." : "Download Excel workbook"
+          }
+          className="inline-flex items-center gap-2 rounded-xl bg-primary px-3.5 py-2 text-sm font-medium text-primary-foreground shadow-[0_8px_24px_-8px_oklch(0.62_0.17_148_/_0.6)] hover:brightness-110 transition disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Download className="h-4 w-4" />
-          <span className="hidden sm:inline">Export</span>
+          <span className="hidden sm:inline">{isExporting ? "Exporting…" : "Export Excel"}</span>
         </button>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="relative grid h-9 w-9 place-items-center rounded-xl border border-border bg-card shadow-soft hover:border-primary/40 transition">
-              <Bell className="h-[18px] w-[18px] text-foreground/80" />
-              <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-accent ring-2 ring-card animate-pulse-dot" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80">
-            <DropdownMenuLabel className="flex items-center justify-between">
-              Notifications
-              <span className="rounded-full bg-primary-soft px-1.5 py-0.5 text-[10px] font-semibold text-primary">
-                {NOTIFICATIONS.length} new
-              </span>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {NOTIFICATIONS.map((n) => (
-              <DropdownMenuItem
-                key={n.title}
-                className="flex flex-col items-start gap-0.5 py-2"
-                onClick={() => navigate("/reports")}
-              >
-                <div className="text-[13px] font-medium">{n.title}</div>
-                <div className="flex w-full items-center justify-between text-[11px] text-muted-foreground">
-                  <span>{n.meta}</span>
-                  <span>{n.time} ago</span>
-                </div>
-              </DropdownMenuItem>
-            ))}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => navigate("/reports")} className="justify-center text-primary font-medium">
-              View all notifications
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -284,14 +268,14 @@ export function TopNavbar({ title, subtitle }: { title: string; subtitle?: strin
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>
               <div className="font-semibold">Adebayo Ogunleye</div>
-              <div className="text-[11px] font-normal text-muted-foreground">admin@campushut.io</div>
+              <div className="text-[11px] font-normal text-muted-foreground">
+                admin@campushut.io
+              </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => navigate("/settings")}>Profile & Preferences</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate("/settings")}>Workspace Settings</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate("/reports")}>Audit Trail</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => toast.success("Signed out (demo)")}>Sign out</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => toast.success("Signed out (demo)")}>
+              Sign out
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

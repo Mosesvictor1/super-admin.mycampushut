@@ -15,8 +15,9 @@ import { DashboardQueryState } from "@/components/dashboard/DashboardQueryState"
 import { DataTable } from "@/components/dashboard/DataTable";
 import { MiniStat } from "@/components/dashboard/MiniStat";
 import { useDocumentTitle } from "@/hooks/use-document-title";
-import { useUserInsights } from "@/lib/dashboard-api";
+import { fetchAllUserInsights, useUserInsights } from "@/lib/dashboard-api";
 import { useDashboardDateRange } from "@/components/dashboard/dashboard-date-range-context";
+import type { DashboardExportData } from "@/lib/dashboard-export";
 
 const PAGE_SIZE = 20;
 const number = (value?: number) => value?.toLocaleString() ?? "—";
@@ -53,11 +54,78 @@ export default function UsersInsightsPage() {
   const totalStudents = data?.totalStudents;
   const pageTotal = totalStudents ?? students.length;
   const hasNext = data?.hasNext ?? page + 1 < Math.ceil(pageTotal / PAGE_SIZE);
+  const exportData: (() => Promise<DashboardExportData>) | undefined = data
+    ? async () => {
+        const allInsights = await fetchAllUserInsights(search, filters, PAGE_SIZE);
+        const allStudents = allInsights.students ?? [];
+        return {
+          reportTitle: "User Insights",
+          rangeLabel: "Last 30 days",
+          filters,
+          summary: [
+            {
+              metric: "New students (30 days)",
+              value: allInsights.summary?.newStudents30Days ?? "—",
+            },
+            {
+              metric: "30-day retention (%)",
+              value: allInsights.summary?.retention30DayPercent ?? "—",
+            },
+            {
+              metric: "Average session duration (minutes)",
+              value: allInsights.summary?.averageSessionDurationMinutes ?? "—",
+            },
+            {
+              metric: "Activation rate (%)",
+              value: allInsights.summary?.activationRatePercent ?? "—",
+            },
+            {
+              metric: "Total matching students",
+              value: allInsights.totalStudents ?? allStudents.length,
+            },
+            { metric: "Rows exported", value: allStudents.length },
+          ],
+          sheets: [
+            {
+              name: "Students",
+              columns: [
+                { header: "Student ID", key: "studentId" },
+                { header: "First name", key: "firstName" },
+                { header: "Last name", key: "lastName" },
+                { header: "Email", key: "email", width: 32 },
+                { header: "University", key: "university", width: 36 },
+                { header: "Plan", key: "plan" },
+                { header: "Last active", key: "lastActive", width: 26 },
+                { header: "Status", key: "status" },
+              ],
+              rows: allStudents,
+            },
+            {
+              name: "Retention Trend",
+              columns: [
+                { header: "Period", key: "period" },
+                { header: "Retention (%)", key: "retentionPercent" },
+              ],
+              rows: allInsights.retentionTrend ?? [],
+            },
+            {
+              name: "Top Regions",
+              columns: [
+                { header: "Region", key: "region" },
+                { header: "Student count", key: "studentCount" },
+              ],
+              rows: allInsights.topRegions ?? [],
+            },
+          ],
+        };
+      }
+    : undefined;
 
   return (
     <DashboardLayout
       title="User Insights"
       subtitle="Track student growth, engagement, and retention"
+      exportData={exportData}
     >
       <DashboardQueryState isLoading={isLoading} error={error} onRetry={() => void refetch()}>
         {data && (

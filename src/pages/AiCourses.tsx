@@ -16,6 +16,7 @@ import { MiniStat } from "@/components/dashboard/MiniStat";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { useAICourseOverview, type AICourseOverview } from "@/lib/dashboard-api";
 import { useDashboardDateRange } from "@/components/dashboard/dashboard-date-range-context";
+import type { DashboardExportData } from "@/lib/dashboard-export";
 import {
   Dialog,
   DialogContent,
@@ -33,11 +34,60 @@ export default function AiCoursesPage() {
   const { data, isLoading, error, refetch } = useAICourseOverview(filters);
   const [course, setCourse] = useState<Course | null>(null);
   const summary = data?.summary;
+  const exportData: DashboardExportData | undefined = data
+    ? {
+        reportTitle: "AI Courses",
+        rangeLabel: "Last 30 days",
+        filters,
+        summary: [
+          { metric: "New students (30 days)", value: summary?.newStudents30Days ?? "—" },
+          { metric: "30-day retention (%)", value: summary?.retention30DayPercent ?? "—" },
+          {
+            metric: "Average session duration (minutes)",
+            value: summary?.averageSessionDurationMinutes ?? "—",
+          },
+          { metric: "Activation rate (%)", value: summary?.activationRatePercent ?? "—" },
+          { metric: "Top courses", value: data.topCourses?.length ?? 0 },
+        ],
+        sheets: [
+          {
+            name: "Enrollment Trend",
+            columns: [
+              { header: "Month", key: "month" },
+              { header: "Enrollments", key: "enrollments" },
+              { header: "Completions", key: "completions" },
+            ],
+            rows: data.enrollmentTrend ?? [],
+          },
+          {
+            name: "Assistant Usage",
+            columns: [
+              { header: "Category", key: "category" },
+              { header: "Sessions", key: "sessions" },
+              { header: "Percentage", key: "percentage" },
+            ],
+            rows: data.assistantUsage ?? [],
+          },
+          {
+            name: "Top Courses",
+            columns: [
+              { header: "Course ID", key: "courseId" },
+              { header: "Title", key: "title", width: 40 },
+              { header: "Students", key: "students" },
+              { header: "Completed students", key: "completedStudents" },
+              { header: "Completion rate (%)", key: "completionRatePercent" },
+            ],
+            rows: data.topCourses ?? [],
+          },
+        ],
+      }
+    : undefined;
 
   return (
     <DashboardLayout
       title="AI Courses"
       subtitle="Course enrollment, completion, and AI assistant usage"
+      exportData={exportData}
     >
       <DashboardQueryState isLoading={isLoading} error={error} onRetry={() => void refetch()}>
         {data && (

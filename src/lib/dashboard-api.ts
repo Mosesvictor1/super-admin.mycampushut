@@ -155,14 +155,59 @@ export function useUserInsights(
 ) {
   return useQuery({
     queryKey: ["dashboard", "users", search, page, size, filters],
-    queryFn: () =>
-      getDashboardData<UserInsightsOverview>("api/dashboard/user-insights/overview", {
-        page,
-        size,
-        search,
-        ...filters,
-      }),
+    queryFn: () => fetchUserInsightsPage(search, page, size, filters),
   });
+}
+
+function fetchUserInsightsPage(
+  search: string,
+  page: number,
+  size: number,
+  filters: OverviewFilters,
+) {
+  return getDashboardData<UserInsightsOverview>("api/dashboard/user-insights/overview", {
+    page,
+    size,
+    search,
+    ...filters,
+  });
+}
+
+export async function fetchAllUserInsights(
+  search: string,
+  filters: OverviewFilters = {},
+  size = 20,
+) {
+  const students: NonNullable<UserInsightsOverview["students"]> = [];
+  let firstPage: UserInsightsOverview | undefined;
+  let page = 0;
+  let hasNext = true;
+
+  while (hasNext) {
+    const result = await fetchUserInsightsPage(search, page, size, filters);
+    firstPage ??= result;
+    const pageStudents = result.students ?? [];
+    if (students.length + pageStudents.length > 1_048_575) {
+      throw new Error("The matching student count exceeds Excel's worksheet row limit.");
+    }
+    students.push(...pageStudents);
+
+    const pageSize = result.size && result.size > 0 ? result.size : size;
+    hasNext =
+      result.hasNext ??
+      (result.totalStudents !== undefined && (page + 1) * pageSize < result.totalStudents);
+    if (hasNext && !pageStudents.length) {
+      throw new Error("The API indicated more students are available but returned an empty page.");
+    }
+
+    page += 1;
+  }
+
+  if (!firstPage) {
+    throw new Error("The API did not return user insights.");
+  }
+
+  return { ...firstPage, students, page: 0, size: students.length, hasNext: false };
 }
 
 export function usePaymentOverview(filters: OverviewFilters = {}) {

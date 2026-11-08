@@ -18,6 +18,7 @@ import { MiniStat } from "@/components/dashboard/MiniStat";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { usePaymentOverview } from "@/lib/dashboard-api";
 import { useDashboardDateRange } from "@/components/dashboard/dashboard-date-range-context";
+import type { DashboardExportData } from "@/lib/dashboard-export";
 import {
   Dialog,
   DialogContent,
@@ -87,11 +88,74 @@ export default function FinancePage() {
   const revenueCurrencies = Array.from(
     new Set((data?.revenueTrend ?? []).map((item) => item.currency)),
   );
+  const exportData: DashboardExportData | undefined = data
+    ? {
+        reportTitle: "Finance and Subscription",
+        rangeLabel: "Last 30 days",
+        filters,
+        summary: [
+          { metric: "New students (30 days)", value: summary?.newStudents30Days ?? "—" },
+          { metric: "30-day retention (%)", value: summary?.retention30DayPercent ?? "—" },
+          {
+            metric: "Average session duration (minutes)",
+            value: summary?.averageSessionDurationMinutes ?? "—",
+          },
+          { metric: "Activation rate (%)", value: summary?.activationRatePercent ?? "—" },
+          { metric: "Recent transactions", value: transactions.length },
+        ],
+        sheets: [
+          {
+            name: "Revenue Trend",
+            columns: [
+              { header: "Month", key: "month" },
+              { header: "Currency", key: "currency" },
+              { header: "Revenue", key: "revenue" },
+            ],
+            rows: data.revenueTrend ?? [],
+          },
+          {
+            name: "Revenue by Type",
+            columns: [
+              { header: "Payment type", key: "paymentType" },
+              { header: "Currency", key: "currency" },
+              { header: "Revenue", key: "revenue" },
+              { header: "Transactions", key: "transactions" },
+            ],
+            rows: data.revenueByType ?? [],
+          },
+          {
+            name: "Payment Methods",
+            columns: [
+              { header: "Payment method", key: "paymentMethod" },
+              { header: "Currency", key: "currency" },
+              { header: "Revenue", key: "revenue" },
+              { header: "Transactions", key: "transactions" },
+            ],
+            rows: data.paymentMethods ?? [],
+          },
+          {
+            name: "Transactions",
+            columns: [
+              { header: "Transaction ID", key: "transactionId" },
+              { header: "Reference", key: "reference", width: 30 },
+              { header: "Amount", key: "amount" },
+              { header: "Currency", key: "currency" },
+              { header: "Status", key: "status" },
+              { header: "Payment type", key: "paymentType" },
+              { header: "Payment method", key: "paymentMethod" },
+              { header: "Created at", key: "createdAt", width: 26 },
+            ],
+            rows: data.recentTransactions ?? [],
+          },
+        ],
+      }
+    : undefined;
 
   return (
     <DashboardLayout
       title="Finance & Subscription"
       subtitle="Revenue trends, payment types, methods, and recent transactions"
+      exportData={exportData}
     >
       <DashboardQueryState isLoading={isLoading} error={error} onRetry={() => void refetch()}>
         {data && (

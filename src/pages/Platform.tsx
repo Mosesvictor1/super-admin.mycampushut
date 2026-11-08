@@ -20,6 +20,7 @@ import { MiniStat } from "@/components/dashboard/MiniStat";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { usePlatformOverview } from "@/lib/dashboard-api";
 import { useDashboardDateRange } from "@/components/dashboard/dashboard-date-range-context";
+import type { DashboardExportData } from "@/lib/dashboard-export";
 
 const chartColors = [
   "oklch(0.62 0.17 148)",
@@ -36,11 +37,73 @@ export default function PlatformPage() {
   const { filters } = useDashboardDateRange();
   const { data, isLoading, error, refetch } = usePlatformOverview(filters);
   const summary = data?.summary;
+  const exportData: DashboardExportData | undefined = data
+    ? {
+        reportTitle: "Platform Overview",
+        rangeLabel: "Last 30 days",
+        filters,
+        summary: [
+          { metric: "Total students", value: summary?.totalStudents ?? "—" },
+          { metric: "Daily active users", value: summary?.dailyActiveUsers ?? "—" },
+          { metric: "Monthly active users", value: summary?.monthlyActiveUsers ?? "—" },
+          { metric: "Active subscriptions", value: summary?.activeSubscriptions ?? "—" },
+        ],
+        sheets: [
+          {
+            name: "Growth Trend",
+            columns: [
+              { header: "Month", key: "month" },
+              { header: "Total students", key: "totalStudents" },
+              { header: "Daily active users", key: "dailyActiveUsers" },
+            ],
+            rows: data.growthTrend ?? [],
+          },
+          {
+            name: "Subscriptions",
+            columns: [
+              { header: "Plan", key: "plan" },
+              { header: "Count", key: "count" },
+              { header: "Percentage", key: "percentage" },
+            ],
+            rows: data.subscriptionDistribution ?? [],
+          },
+          {
+            name: "Top Universities",
+            columns: [
+              { header: "University", key: "university" },
+              { header: "Student count", key: "studentCount" },
+            ],
+            rows: data.topUniversities ?? [],
+          },
+          {
+            name: "Critical Alerts",
+            columns: [
+              { header: "Type", key: "alertType" },
+              { header: "Title", key: "title" },
+              { header: "Description", key: "description", width: 48 },
+              { header: "Count", key: "count" },
+              { header: "Severity", key: "severity" },
+            ],
+            rows: data.criticalAlerts ?? [],
+          },
+          {
+            name: "Recent Activity",
+            columns: [
+              { header: "Event type", key: "eventType" },
+              { header: "Description", key: "description", width: 48 },
+              { header: "Occurred at", key: "occurredAt", width: 24 },
+            ],
+            rows: data.recentActivity ?? [],
+          },
+        ],
+      }
+    : undefined;
 
   return (
     <DashboardLayout
       title="Platform Overview"
       subtitle="Student growth, activity, and subscription health"
+      exportData={exportData}
     >
       <DashboardQueryState isLoading={isLoading} error={error} onRetry={() => void refetch()}>
         {data && (
