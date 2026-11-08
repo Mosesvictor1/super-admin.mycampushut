@@ -21,22 +21,29 @@ import {
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { dashboardModules, type DashboardModule } from "@/lib/dashboard-modules";
+import type { LucideIcon } from "lucide-react";
 
 const NAV = [
-  { to: "/", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/platform", label: "Platform Overview", icon: Activity },
-  { to: "/users", label: "User Insights", icon: Users },
-  { to: "/finance", label: "Finance & Subscription", icon: Wallet },
-  { to: "/jobs", label: "Jobs Analytics", icon: Briefcase },
-  { to: "/assignments", label: "Assignments", icon: ClipboardList },
-  { to: "/marketplace", label: "Marketplace", icon: Store },
-  { to: "/ai-courses", label: "AI Courses", icon: Sparkles },
-  { to: "/library", label: "Learning Library", icon: BookOpen },
-  { to: "/news-blog", label: "News & Blog", icon: Newspaper },
-  { to: "/brand", label: "Brand Ads", icon: Megaphone },
-  { to: "/reports", label: "Reports", icon: FileBarChart },
+  { to: "/", label: "Dashboard", icon: LayoutDashboard, module: "platform" },
+  { to: "/platform", label: "Platform Overview", icon: Activity, module: "platform" },
+  { to: "/users", label: "User Insights", icon: Users, module: "users" },
+  { to: "/finance", label: "Finance & Subscription", icon: Wallet, module: "finance" },
+  { to: "/jobs", label: "Jobs Analytics", icon: Briefcase, module: "jobs" },
+  { to: "/assignments", label: "Assignments", icon: ClipboardList, module: "assignments" },
+  { to: "/marketplace", label: "Marketplace", icon: Store, module: "marketplace" },
+  { to: "/ai-courses", label: "AI Courses", icon: Sparkles, module: "aiCourses" },
+  { to: "/library", label: "Learning Library", icon: BookOpen, module: "library" },
+  { to: "/news-blog", label: "News & Blog", icon: Newspaper, module: "newsBlog" },
+  { to: "/brand", label: "Brand Ads", icon: Megaphone, module: "brand" },
+  { to: "/reports", label: "Reports", icon: FileBarChart, module: "reports" },
   { to: "/settings", label: "Settings", icon: Settings },
-] as const;
+] satisfies {
+  to: string;
+  label: string;
+  icon: LucideIcon;
+  module?: DashboardModule;
+}[];
 
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
@@ -53,7 +60,10 @@ export function Sidebar() {
           "radial-gradient(120% 60% at 0% 0%, oklch(0.32 0.08 155 / 0.6), transparent 60%), radial-gradient(80% 40% at 100% 100%, oklch(0.55 0.16 148 / 0.18), transparent 70%)",
       }}
     >
-      <Link to="/" className="flex items-center gap-3 px-5 py-5 border-b border-sidebar-border hover:opacity-90 transition-opacity">
+      <Link
+        to="/"
+        className="flex items-center gap-3 px-5 py-5 border-b border-sidebar-border hover:opacity-90 transition-opacity"
+      >
         <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-[oklch(0.72_0.18_148)] to-[oklch(0.55_0.16_148)] shadow-[0_8px_24px_-8px_oklch(0.55_0.16_148_/_0.6)]">
           <GraduationCap className="h-5 w-5 text-white" strokeWidth={2.4} />
         </div>
@@ -75,27 +85,29 @@ export function Sidebar() {
             Workspace
           </div>
         )}
-        {NAV.map(({ to, label, icon: Icon }) => {
-          const active = to === "/" ? pathname === "/" : pathname.startsWith(to);
-          return (
-            <Link
-              key={to}
-              to={to}
-              className={cn(
-                "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors",
-                active
-                  ? "bg-[oklch(0.32_0.06_155)] text-white sidebar-glow"
-                  : "text-sidebar-foreground/80 hover:bg-[oklch(0.30_0.05_155)] hover:text-white",
-              )}
-            >
-              <Icon className="h-[18px] w-[18px] shrink-0" strokeWidth={active ? 2.2 : 1.8} />
-              {!collapsed && <span className="truncate">{label}</span>}
-              {!collapsed && active && (
-                <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[oklch(0.85_0.18_148)] shadow-[0_0_10px_oklch(0.85_0.18_148)]" />
-              )}
-            </Link>
-          );
-        })}
+        {NAV.filter(({ module }) => !module || dashboardModules[module]).map(
+          ({ to, label, icon: Icon }) => {
+            const active = to === "/" ? pathname === "/" : pathname.startsWith(to);
+            return (
+              <Link
+                key={to}
+                to={to}
+                className={cn(
+                  "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors",
+                  active
+                    ? "bg-[oklch(0.32_0.06_155)] text-white sidebar-glow"
+                    : "text-sidebar-foreground/80 hover:bg-[oklch(0.30_0.05_155)] hover:text-white",
+                )}
+              >
+                <Icon className="h-[18px] w-[18px] shrink-0" strokeWidth={active ? 2.2 : 1.8} />
+                {!collapsed && <span className="truncate">{label}</span>}
+                {!collapsed && active && (
+                  <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[oklch(0.85_0.18_148)] shadow-[0_0_10px_oklch(0.85_0.18_148)]" />
+                )}
+              </Link>
+            );
+          },
+        )}
       </nav>
 
       <div className="border-t border-sidebar-border p-3">

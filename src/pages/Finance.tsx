@@ -1,33 +1,23 @@
 import { useState } from "react";
-import { Wallet, TrendingUp, Users, PieChart as PieIcon, CheckCircle2, XCircle, RotateCcw } from "lucide-react";
+import { CheckCircle2, Timer, UserPlus, Users, XCircle, RotateCcw, Zap } from "lucide-react";
 import {
-  Area,
-  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
-  Cell,
   Line,
-  Pie,
-  PieChart,
+  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
-import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { ChartCard } from "@/components/dashboard/ChartCard";
+import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
+import { DashboardQueryState } from "@/components/dashboard/DashboardQueryState";
 import { MiniStat } from "@/components/dashboard/MiniStat";
-import {
-  financeKPIs,
-  revenueTrend,
-  revenueByPlan,
-  paymentMethods,
-  transactions,
-} from "@/lib/mock-data";
 import { useDocumentTitle } from "@/hooks/use-document-title";
-import { cn } from "@/lib/utils";
-import { toast } from "sonner";
+import { usePaymentOverview } from "@/lib/dashboard-api";
+import { useDashboardDateRange } from "@/components/dashboard/dashboard-date-range-context";
 import {
   Dialog,
   DialogContent,
@@ -35,195 +25,315 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 
-function TT({ active, payload, label }: any) {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="rounded-xl border border-border bg-card/95 px-3 py-2 shadow-card text-[12px]">
-      {label && <div className="font-medium mb-1">{label}</div>}
-      {payload.map((p: any, i: number) => (
-        <div key={i} className="flex items-center gap-2 text-muted-foreground">
-          <span className="h-2 w-2 rounded-full" style={{ background: p.color || p.fill }} />
-          <span className="capitalize">{p.name}:</span>
-          <span className="font-semibold text-foreground tabular-nums">
-            ₦{Number(p.value).toLocaleString()}
-          </span>
-        </div>
-      ))}
-    </div>
-  );
-}
+type Transaction = NonNullable<
+  ReturnType<typeof usePaymentOverview>["data"]
+>["recentTransactions"] extends (infer Item)[] | undefined
+  ? Item
+  : never;
 
-const statusStyle = {
-  Success: { cls: "bg-primary-soft text-primary ring-primary/20", Icon: CheckCircle2 },
-  Failed: { cls: "bg-[oklch(0.96_0.06_27)] text-destructive ring-destructive/20", Icon: XCircle },
-  Refunded: { cls: "bg-[oklch(0.96_0.04_50)] text-accent ring-accent/20", Icon: RotateCcw },
-} as const;
+const colors = [
+  "oklch(0.62 0.17 148)",
+  "oklch(0.55 0.15 240)",
+  "oklch(0.65 0.18 300)",
+  "oklch(0.72 0.18 50)",
+];
+
+const number = (value?: number) => value?.toLocaleString() ?? "—";
+const statusClass = (status: string) => {
+  switch (status.toLowerCase()) {
+    case "success":
+    case "successful":
+    case "completed":
+      return "bg-primary-soft text-primary ring-primary/20";
+    case "failed":
+    case "failure":
+      return "bg-[oklch(0.96_0.06_27)] text-destructive ring-destructive/20";
+    case "refunded":
+      return "bg-[oklch(0.96_0.04_50)] text-accent ring-accent/20";
+    default:
+      return "bg-muted text-muted-foreground ring-border";
+  }
+};
+
+const StatusIcon = ({ status }: { status: string }) => {
+  const normalized = status.toLowerCase();
+  if (["success", "successful", "completed"].includes(normalized)) {
+    return <CheckCircle2 className="h-3 w-3" />;
+  }
+  if (["failed", "failure"].includes(normalized)) {
+    return <XCircle className="h-3 w-3" />;
+  }
+  if (normalized === "refunded") return <RotateCcw className="h-3 w-3" />;
+  return null;
+};
 
 export default function FinancePage() {
   useDocumentTitle("CampusHut Admin — Finance & Subscription");
-  const [txn, setTxn] = useState<(typeof transactions)[number] | null>(null);
+  const { filters } = useDashboardDateRange();
+  const { data, isLoading, error, refetch } = usePaymentOverview(filters);
+  const [transaction, setTransaction] = useState<Transaction | null>(null);
+  const summary = data?.summary;
+  const transactions = data?.recentTransactions ?? [];
+  const revenueRows = (data?.revenueTrend ?? []).reduce<
+    Record<string, Record<string, string | number>>
+  >((rows, item) => {
+    const row = rows[item.month] ?? { month: item.month };
+    row[item.currency] = item.revenue;
+    rows[item.month] = row;
+    return rows;
+  }, {});
+  const revenueCurrencies = Array.from(
+    new Set((data?.revenueTrend ?? []).map((item) => item.currency)),
+  );
 
   return (
-    <DashboardLayout title="Finance & Subscription" subtitle="MRR, revenue, churn, and payments across all plans">
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <MiniStat icon={Wallet} tone="primary" label="MRR" value={financeKPIs.mrr.value} delta={financeKPIs.mrr.delta} />
-        <MiniStat icon={TrendingUp} tone="blue" label="ARR" value={financeKPIs.arr.value} delta={financeKPIs.arr.delta} />
-        <MiniStat icon={Users} tone="violet" label="ARPU" value={financeKPIs.arpu.value} delta={financeKPIs.arpu.delta} />
-        <MiniStat icon={PieIcon} tone="accent" label="Churn Rate" value={financeKPIs.churn.value} delta={financeKPIs.churn.delta} />
-      </div>
-
-      <div className="mt-5 grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <div className="xl:col-span-2">
-          <ChartCard
-            title="Revenue vs Target"
-            description="Monthly recurring revenue (₦) · trailing 12 months"
-            action={
-              <div className="flex items-center gap-3 text-[11.5px]">
-                <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-primary" />Revenue</span>
-                <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-accent" />Target</span>
-              </div>
-            }
-          >
-            <div className="h-[300px] -mx-2">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={revenueTrend} margin={{ top: 10, right: 16, left: -8, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="gRev" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="oklch(0.62 0.17 148)" stopOpacity={0.32} />
-                      <stop offset="100%" stopColor="oklch(0.62 0.17 148)" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 6" stroke="oklch(0.92 0.008 240)" vertical={false} />
-                  <XAxis dataKey="m" tickLine={false} axisLine={false} tick={{ fill: "oklch(0.52 0.02 250)", fontSize: 11 }} />
-                  <YAxis tickLine={false} axisLine={false} tick={{ fill: "oklch(0.52 0.02 250)", fontSize: 11 }} tickFormatter={(v) => `₦${(v / 1000).toFixed(0)}k`} />
-                  <Tooltip content={<TT />} />
-                  <Area type="monotone" dataKey="revenue" stroke="oklch(0.62 0.17 148)" strokeWidth={2.5} fill="url(#gRev)" />
-                  <Line type="monotone" dataKey="target" stroke="oklch(0.72 0.18 50)" strokeWidth={2} strokeDasharray="5 4" dot={false} />
-                </AreaChart>
-              </ResponsiveContainer>
+    <DashboardLayout
+      title="Finance & Subscription"
+      subtitle="Revenue trends, payment types, methods, and recent transactions"
+    >
+      <DashboardQueryState isLoading={isLoading} error={error} onRetry={() => void refetch()}>
+        {data && (
+          <>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <MiniStat
+                icon={UserPlus}
+                tone="primary"
+                label="New Students (30D)"
+                value={number(summary?.newStudents30Days)}
+              />
+              <MiniStat
+                icon={Users}
+                tone="blue"
+                label="30-Day Retention"
+                value={summary?.retention30DayPercent ?? "—"}
+                suffix={summary ? "%" : undefined}
+              />
+              <MiniStat
+                icon={Timer}
+                tone="violet"
+                label="Avg. Session Duration"
+                value={summary?.averageSessionDurationMinutes ?? "—"}
+                suffix={summary ? "min" : undefined}
+              />
+              <MiniStat
+                icon={Zap}
+                tone="accent"
+                label="Activation Rate"
+                value={summary?.activationRatePercent ?? "—"}
+                suffix={summary ? "%" : undefined}
+              />
             </div>
-          </ChartCard>
-        </div>
 
-        <ChartCard title="Revenue by Plan" description="Contribution to MRR">
-          <div className="relative h-[200px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={revenueByPlan} dataKey="value" innerRadius={62} outerRadius={86} paddingAngle={3} stroke="none">
-                  {revenueByPlan.map((p, i) => <Cell key={i} fill={p.color} />)}
-                </Pie>
-                <Tooltip content={<TT />} />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <div className="text-[11px] uppercase tracking-wider text-muted-foreground">MRR</div>
-              <div className="text-xl font-semibold tabular-nums">₦84.2k</div>
-            </div>
-          </div>
-          <div className="mt-3 space-y-1.5">
-            {revenueByPlan.map((p) => (
-              <div key={p.name} className="flex items-center justify-between rounded-lg border border-border px-2.5 py-1.5 text-[12.5px]">
-                <span className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full" style={{ background: p.color }} />
-                  {p.name}
-                </span>
-                <span className="tabular-nums font-semibold">₦{p.value.toLocaleString()}</span>
-              </div>
-            ))}
-          </div>
-        </ChartCard>
-      </div>
-
-      <div className="mt-5 grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <ChartCard title="Payment Methods" description="Share of successful transactions">
-          <div className="h-[240px] -mx-2">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={paymentMethods} margin={{ top: 10, right: 16, left: -12, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 6" stroke="oklch(0.92 0.008 240)" vertical={false} />
-                <XAxis dataKey="name" tickLine={false} axisLine={false} tick={{ fill: "oklch(0.52 0.02 250)", fontSize: 11 }} />
-                <YAxis tickLine={false} axisLine={false} tick={{ fill: "oklch(0.52 0.02 250)", fontSize: 11 }} tickFormatter={(v) => `${v}%`} />
-                <Tooltip cursor={{ fill: "oklch(0.96 0.01 240)" }} />
-                <Bar dataKey="value" fill="oklch(0.55 0.15 240)" radius={[8, 8, 0, 0]} barSize={40} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </ChartCard>
-
-        <div className="xl:col-span-2 rounded-2xl border border-border bg-card shadow-card">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-            <div>
-              <h3 className="text-[15px] font-semibold tracking-tight">Recent Transactions</h3>
-              <p className="mt-0.5 text-[12px] text-muted-foreground">Latest {transactions.length} payment events</p>
-            </div>
-            <button
-              onClick={() => toast.success("CSV export queued")}
-              className="text-[12px] text-primary hover:underline"
-            >
-              Export CSV
-            </button>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-[11px] uppercase tracking-wider text-muted-foreground">
-                  <th className="text-left font-medium px-5 py-3">Txn ID</th>
-                  <th className="text-left font-medium px-5 py-3">User</th>
-                  <th className="text-left font-medium px-5 py-3">Amount</th>
-                  <th className="text-left font-medium px-5 py-3">Method</th>
-                  <th className="text-left font-medium px-5 py-3">Status</th>
-                  <th className="text-left font-medium px-5 py-3">Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {transactions.map((t) => {
-                  const s = statusStyle[t.status];
-                  return (
-                    <tr
-                      key={t.id}
-                      onClick={() => setTxn(t)}
-                      className="border-t border-border hover:bg-muted/40 transition-colors cursor-pointer"
+            <div className="mt-5 grid grid-cols-1 gap-4 xl:grid-cols-3">
+              <ChartCard
+                className="xl:col-span-2"
+                title="Revenue Trend"
+                description="Monthly revenue by currency"
+              >
+                <div className="h-[300px] -mx-2">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart
+                      data={Object.values(revenueRows)}
+                      margin={{ top: 10, right: 16, left: -8, bottom: 0 }}
                     >
-                      <td className="px-5 py-3 font-mono text-[12px] text-muted-foreground">{t.id}</td>
-                      <td className="px-5 py-3 font-medium">{t.user}</td>
-                      <td className="px-5 py-3 tabular-nums font-semibold">₦{t.amount.toLocaleString()}</td>
-                      <td className="px-5 py-3 text-muted-foreground">{t.method}</td>
-                      <td className="px-5 py-3">
-                        <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11.5px] font-medium ring-1 ring-inset", s.cls)}>
-                          <s.Icon className="h-3 w-3" />
-                          {t.status}
-                        </span>
-                      </td>
-                      <td className="px-5 py-3 text-muted-foreground tabular-nums">{t.date}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+                      <CartesianGrid
+                        strokeDasharray="3 6"
+                        stroke="oklch(0.92 0.008 240)"
+                        vertical={false}
+                      />
+                      <XAxis
+                        dataKey="month"
+                        tickLine={false}
+                        axisLine={false}
+                        tick={{ fill: "oklch(0.52 0.02 250)", fontSize: 11 }}
+                      />
+                      <YAxis
+                        tickLine={false}
+                        axisLine={false}
+                        tick={{ fill: "oklch(0.52 0.02 250)", fontSize: 11 }}
+                      />
+                      <Tooltip />
+                      {revenueCurrencies.map((currency, index) => (
+                        <Line
+                          key={currency}
+                          type="monotone"
+                          dataKey={currency}
+                          name={currency}
+                          stroke={colors[index % colors.length]}
+                          strokeWidth={2.5}
+                          dot={false}
+                        />
+                      ))}
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </ChartCard>
 
-      <Dialog open={!!txn} onOpenChange={(v) => !v && setTxn(null)}>
-        <DialogContent>
-          {txn && (
-            <>
-              <DialogHeader>
-                <DialogTitle className="font-mono">{txn.id}</DialogTitle>
-                <DialogDescription>Transaction details</DialogDescription>
-              </DialogHeader>
-              <dl className="mt-2 grid grid-cols-2 gap-3 text-[13px]">
-                <Field label="User" value={txn.user} />
-                <Field label="Plan" value={txn.plan} />
-                <Field label="Amount" value={`₦${txn.amount.toLocaleString()}`} />
-                <Field label="Method" value={txn.method} />
-                <Field label="Status" value={txn.status} />
-                <Field label="Date" value={txn.date} />
-              </dl>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+              <ChartCard title="Revenue by Type" description="Revenue contribution">
+                <div className="space-y-2">
+                  {(data.revenueByType ?? []).map((item, index) => (
+                    <div
+                      key={`${item.paymentType}-${item.currency}-${index}`}
+                      className="flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2.5 text-xs"
+                    >
+                      <div className="min-w-0">
+                        <div className="truncate font-medium">{item.paymentType}</div>
+                        <div className="mt-0.5 text-muted-foreground">
+                          {number(item.transactions)} transactions
+                        </div>
+                      </div>
+                      <span className="shrink-0 font-semibold tabular-nums">
+                        {item.currency} {number(item.revenue)}
+                      </span>
+                    </div>
+                  ))}
+                  {!data.revenueByType?.length && (
+                    <p className="py-8 text-center text-sm text-muted-foreground">
+                      No revenue by type reported.
+                    </p>
+                  )}
+                </div>
+              </ChartCard>
+            </div>
+
+            <div className="mt-5 grid grid-cols-1 gap-4 xl:grid-cols-3">
+              <ChartCard
+                title="Transactions by Payment Method"
+                description="Transaction count; revenue is listed by currency"
+              >
+                <div className="h-[260px] -mx-2">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={data.paymentMethods ?? []}
+                      margin={{ top: 10, right: 16, left: -8, bottom: 0 }}
+                    >
+                      <CartesianGrid
+                        strokeDasharray="3 6"
+                        stroke="oklch(0.92 0.008 240)"
+                        vertical={false}
+                      />
+                      <XAxis
+                        dataKey="paymentMethod"
+                        tickLine={false}
+                        axisLine={false}
+                        tick={{ fill: "oklch(0.52 0.02 250)", fontSize: 11 }}
+                      />
+                      <YAxis tickLine={false} axisLine={false} />
+                      <Tooltip />
+                      <Bar
+                        dataKey="transactions"
+                        name="Transactions"
+                        fill={colors[1]}
+                        radius={[7, 7, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="space-y-1.5">
+                  {(data.paymentMethods ?? []).map((item, index) => (
+                    <div
+                      key={`${item.paymentMethod}-${item.currency}-${index}`}
+                      className="flex items-center justify-between gap-3 border-t border-border pt-2 text-xs"
+                    >
+                      <span className="truncate">{item.paymentMethod}</span>
+                      <span className="shrink-0 font-medium tabular-nums">
+                        {item.currency} {number(item.revenue)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </ChartCard>
+
+              <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-card xl:col-span-2">
+                <div className="border-b border-border px-5 py-4">
+                  <h3 className="text-[15px] font-semibold tracking-tight">Recent Transactions</h3>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    Latest {transactions.length} payment events
+                  </p>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                        <th className="px-4 py-3 text-left font-medium">Reference</th>
+                        <th className="px-4 py-3 text-left font-medium">Amount</th>
+                        <th className="px-4 py-3 text-left font-medium">Method</th>
+                        <th className="px-4 py-3 text-left font-medium">Status</th>
+                        <th className="px-4 py-3 text-left font-medium">Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {transactions.map((item) => (
+                        <tr
+                          key={item.transactionId}
+                          onClick={() => setTransaction(item)}
+                          className="cursor-pointer border-t border-border hover:bg-muted/40"
+                        >
+                          <td className="px-4 py-3 font-mono text-xs">{item.reference}</td>
+                          <td className="px-4 py-3 font-semibold tabular-nums">
+                            {item.currency} {number(item.amount)}
+                          </td>
+                          <td className="px-4 py-3 text-muted-foreground">{item.paymentMethod}</td>
+                          <td className="px-4 py-3">
+                            <span
+                              className={cn(
+                                "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset",
+                                statusClass(item.status),
+                              )}
+                            >
+                              <StatusIcon status={item.status} />
+                              {item.status}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-xs text-muted-foreground">
+                            {item.createdAt}
+                          </td>
+                        </tr>
+                      ))}
+                      {!transactions.length && (
+                        <tr>
+                          <td
+                            colSpan={5}
+                            className="px-4 py-8 text-center text-sm text-muted-foreground"
+                          >
+                            No transactions reported.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            </div>
+
+            <Dialog open={!!transaction} onOpenChange={(open) => !open && setTransaction(null)}>
+              <DialogContent>
+                {transaction && (
+                  <>
+                    <DialogHeader>
+                      <DialogTitle className="font-mono">{transaction.reference}</DialogTitle>
+                      <DialogDescription>Transaction details</DialogDescription>
+                    </DialogHeader>
+                    <dl className="mt-2 grid grid-cols-2 gap-3 text-[13px]">
+                      <Field label="Transaction ID" value={String(transaction.transactionId)} />
+                      <Field
+                        label="Amount"
+                        value={`${transaction.currency} ${number(transaction.amount)}`}
+                      />
+                      <Field label="Payment type" value={transaction.paymentType} />
+                      <Field label="Method" value={transaction.paymentMethod} />
+                      <Field label="Status" value={transaction.status} />
+                      <Field label="Date" value={transaction.createdAt} />
+                    </dl>
+                  </>
+                )}
+              </DialogContent>
+            </Dialog>
+          </>
+        )}
+      </DashboardQueryState>
     </DashboardLayout>
   );
 }

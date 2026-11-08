@@ -1,178 +1,279 @@
-import {
-  Server,
-  Activity,
-  Zap,
-  Database,
-  Cloud,
-  ShieldCheck,
-  Cpu,
-} from "lucide-react";
+import { Activity, BadgeCheck, Bell, GraduationCap, Users } from "lucide-react";
 import {
   Area,
   AreaChart,
+  Bar,
+  BarChart,
   CartesianGrid,
+  Cell,
+  Pie,
+  PieChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
-import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { ChartCard } from "@/components/dashboard/ChartCard";
+import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
+import { DashboardQueryState } from "@/components/dashboard/DashboardQueryState";
 import { MiniStat } from "@/components/dashboard/MiniStat";
-import { AlertCard } from "@/components/dashboard/AlertCard";
-import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { useDocumentTitle } from "@/hooks/use-document-title";
-import { cn } from "@/lib/utils";
-import { toast } from "sonner";
+import { usePlatformOverview } from "@/lib/dashboard-api";
+import { useDashboardDateRange } from "@/components/dashboard/dashboard-date-range-context";
 
-const latency = Array.from({ length: 24 }, (_, i) => ({
-  t: `${i}:00`,
-  api: 90 + Math.sin(i * 0.5) * 18 + (i > 14 && i < 20 ? 40 : 0),
-  db: 45 + Math.cos(i * 0.4) * 10 + (i > 15 && i < 19 ? 22 : 0),
-}));
+const chartColors = [
+  "oklch(0.62 0.17 148)",
+  "oklch(0.55 0.15 240)",
+  "oklch(0.65 0.18 300)",
+  "oklch(0.72 0.18 50)",
+  "oklch(0.62 0.17 27)",
+];
 
-const services = [
-  { name: "API Gateway", uptime: 99.98, latency: "112 ms", status: "Operational" },
-  { name: "Auth Service", uptime: 99.99, latency: "84 ms", status: "Operational" },
-  { name: "Payments Worker", uptime: 99.82, latency: "246 ms", status: "Degraded" },
-  { name: "AI Inference", uptime: 99.94, latency: "412 ms", status: "Operational" },
-  { name: "Media CDN", uptime: 99.97, latency: "58 ms", status: "Operational" },
-  { name: "Realtime WS", uptime: 99.91, latency: "72 ms", status: "Operational" },
-] as const;
-
-const statusCls: Record<(typeof services)[number]["status"], string> = {
-  Operational: "bg-primary-soft text-primary ring-primary/20",
-  Degraded: "bg-[oklch(0.96_0.04_50)] text-accent ring-accent/30",
-};
+const count = (value?: number) => value?.toLocaleString() ?? "—";
 
 export default function PlatformPage() {
   useDocumentTitle("CampusHut Admin — Platform Overview");
+  const { filters } = useDashboardDateRange();
+  const { data, isLoading, error, refetch } = usePlatformOverview(filters);
+  const summary = data?.summary;
+
   return (
-    <DashboardLayout title="Platform Overview" subtitle="Infrastructure health, latency, and reliability across services">
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <MiniStat icon={Activity} tone="primary" label="Overall Uptime" value="99.96" suffix="%" delta={0.04} />
-        <MiniStat icon={Zap} tone="blue" label="Avg. API Latency" value="112" suffix="ms" delta={-4.2} />
-        <MiniStat icon={Database} tone="violet" label="DB Query p95" value="68" suffix="ms" delta={2.1} />
-        <MiniStat icon={Cloud} tone="accent" label="Error Rate" value="0.14" suffix="%" delta={-0.6} />
-      </div>
-
-      <div className="mt-5 grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <div className="xl:col-span-2">
-          <ChartCard
-            title="Latency — last 24h"
-            description="API and database response time"
-            action={
-              <div className="flex items-center gap-3 text-[11.5px]">
-                <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-primary" />API</span>
-                <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[oklch(0.65_0.18_300)]" />DB</span>
-              </div>
-            }
-          >
-            <div className="h-[280px] -mx-2">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={latency} margin={{ top: 10, right: 16, left: -12, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="gApi" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="oklch(0.62 0.17 148)" stopOpacity={0.28} />
-                      <stop offset="100%" stopColor="oklch(0.62 0.17 148)" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="gDb" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="oklch(0.65 0.18 300)" stopOpacity={0.24} />
-                      <stop offset="100%" stopColor="oklch(0.65 0.18 300)" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 6" stroke="oklch(0.92 0.008 240)" vertical={false} />
-                  <XAxis dataKey="t" tickLine={false} axisLine={false} tick={{ fill: "oklch(0.52 0.02 250)", fontSize: 10 }} interval={2} />
-                  <YAxis tickLine={false} axisLine={false} tick={{ fill: "oklch(0.52 0.02 250)", fontSize: 11 }} tickFormatter={(v) => `${v} ms`} />
-                  <Tooltip />
-                  <Area type="monotone" dataKey="api" stroke="oklch(0.62 0.17 148)" strokeWidth={2.5} fill="url(#gApi)" />
-                  <Area type="monotone" dataKey="db" stroke="oklch(0.65 0.18 300)" strokeWidth={2} fill="url(#gDb)" />
-                </AreaChart>
-              </ResponsiveContainer>
+    <DashboardLayout
+      title="Platform Overview"
+      subtitle="Student growth, activity, and subscription health"
+    >
+      <DashboardQueryState isLoading={isLoading} error={error} onRetry={() => void refetch()}>
+        {data && (
+          <>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <MiniStat
+                icon={GraduationCap}
+                label="Total Students"
+                value={count(summary?.totalStudents)}
+                tone="primary"
+              />
+              <MiniStat
+                icon={Activity}
+                label="Daily Active Users"
+                value={count(summary?.dailyActiveUsers)}
+                tone="blue"
+              />
+              <MiniStat
+                icon={Users}
+                label="Monthly Active Users"
+                value={count(summary?.monthlyActiveUsers)}
+                tone="violet"
+              />
+              <MiniStat
+                icon={BadgeCheck}
+                label="Active Subscriptions"
+                value={count(summary?.activeSubscriptions)}
+                tone="accent"
+              />
             </div>
-          </ChartCard>
-        </div>
 
-        <ChartCard title="Compute & Storage" description="Live resource utilization">
-          <div className="space-y-4">
-            {[
-              { icon: Cpu, label: "CPU", value: 62, note: "12 nodes · us-east-1" },
-              { icon: Server, label: "Memory", value: 48, note: "128 GB provisioned" },
-              { icon: Database, label: "DB Connections", value: 74, note: "148 / 200" },
-              { icon: ShieldCheck, label: "Cache Hit Rate", value: 92, note: "Redis · 1.8 GB" },
-            ].map((r) => (
-              <div key={r.label}>
-                <div className="flex items-center gap-2 text-[12.5px]">
-                  <r.icon className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="font-medium">{r.label}</span>
-                  <span className="ml-auto tabular-nums font-semibold">{r.value}%</span>
+            <div className="mt-5 grid grid-cols-1 gap-4 xl:grid-cols-3">
+              <ChartCard
+                className="xl:col-span-2"
+                title="Student Growth and Activity"
+                description="Monthly totals and daily active users"
+              >
+                <div className="h-[300px] -mx-2">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart
+                      data={data.growthTrend ?? []}
+                      margin={{ top: 10, right: 16, left: -12, bottom: 0 }}
+                    >
+                      <defs>
+                        <linearGradient id="studentsGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor={chartColors[0]} stopOpacity={0.3} />
+                          <stop offset="100%" stopColor={chartColors[0]} stopOpacity={0} />
+                        </linearGradient>
+                        <linearGradient id="activeGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor={chartColors[1]} stopOpacity={0.25} />
+                          <stop offset="100%" stopColor={chartColors[1]} stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid
+                        strokeDasharray="3 6"
+                        stroke="oklch(0.92 0.008 240)"
+                        vertical={false}
+                      />
+                      <XAxis
+                        dataKey="month"
+                        tickLine={false}
+                        axisLine={false}
+                        tick={{ fill: "oklch(0.52 0.02 250)", fontSize: 11 }}
+                      />
+                      <YAxis
+                        tickLine={false}
+                        axisLine={false}
+                        tick={{ fill: "oklch(0.52 0.02 250)", fontSize: 11 }}
+                      />
+                      <Tooltip />
+                      <Area
+                        type="monotone"
+                        dataKey="totalStudents"
+                        name="Total students"
+                        stroke={chartColors[0]}
+                        strokeWidth={2.5}
+                        fill="url(#studentsGradient)"
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="dailyActiveUsers"
+                        name="Daily active users"
+                        stroke={chartColors[1]}
+                        strokeWidth={2}
+                        fill="url(#activeGradient)"
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
                 </div>
-                <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-muted">
-                  <div
-                    className={cn(
-                      "h-full rounded-full",
-                      r.value >= 80 ? "bg-destructive" : r.value >= 60 ? "bg-accent" : "bg-primary",
-                    )}
-                    style={{ width: `${r.value}%` }}
-                  />
-                </div>
-                <div className="mt-0.5 text-[11px] text-muted-foreground">{r.note}</div>
-              </div>
-            ))}
-          </div>
-        </ChartCard>
-      </div>
+              </ChartCard>
 
-      <div className="mt-5 grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <div className="xl:col-span-2 rounded-2xl border border-border bg-card shadow-card">
-          <div className="px-5 py-4 border-b border-border">
-            <h3 className="text-[15px] font-semibold tracking-tight">Service Health</h3>
-            <p className="mt-0.5 text-[12px] text-muted-foreground">Live status across microservices</p>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-[11px] uppercase tracking-wider text-muted-foreground">
-                  <th className="text-left font-medium px-5 py-3">Service</th>
-                  <th className="text-left font-medium px-5 py-3">Uptime (30d)</th>
-                  <th className="text-left font-medium px-5 py-3">Latency</th>
-                  <th className="text-left font-medium px-5 py-3">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {services.map((s) => (
-                  <tr
-                    key={s.name}
-                    onClick={() => toast(`${s.name}`, { description: `${s.status} · ${s.latency} · Uptime ${s.uptime}%` })}
-                    className="border-t border-border hover:bg-muted/40 cursor-pointer"
-                  >
-                    <td className="px-5 py-3.5 font-medium">{s.name}</td>
-                    <td className="px-5 py-3.5 tabular-nums">{s.uptime}%</td>
-                    <td className="px-5 py-3.5 text-muted-foreground tabular-nums">{s.latency}</td>
-                    <td className="px-5 py-3.5">
-                      <span className={cn(
-                        "inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11.5px] font-medium ring-1 ring-inset",
-                        statusCls[s.status],
-                      )}>
-                        <span className={cn(
-                          "h-1.5 w-1.5 rounded-full",
-                          s.status === "Operational" ? "bg-primary" : "bg-accent",
-                        )} />
-                        {s.status}
+              <ChartCard
+                title="Subscription Distribution"
+                description="Active subscriptions by plan"
+              >
+                <div className="h-[210px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={data.subscriptionDistribution ?? []}
+                        dataKey="count"
+                        nameKey="plan"
+                        innerRadius={58}
+                        outerRadius={86}
+                        paddingAngle={3}
+                        stroke="none"
+                      >
+                        {(data.subscriptionDistribution ?? []).map((plan, index) => (
+                          <Cell key={plan.plan} fill={chartColors[index % chartColors.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="space-y-1.5">
+                  {(data.subscriptionDistribution ?? []).map((plan, index) => (
+                    <div
+                      key={plan.plan}
+                      className="flex items-center justify-between rounded-lg border border-border px-2.5 py-1.5 text-xs"
+                    >
+                      <span className="flex items-center gap-2">
+                        <span
+                          className="h-2 w-2 rounded-full"
+                          style={{
+                            background: chartColors[index % chartColors.length],
+                          }}
+                        />
+                        {plan.plan}
                       </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <AlertCard />
-      </div>
+                      <span className="font-semibold tabular-nums">
+                        {count(plan.count)} · {plan.percentage}%
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </ChartCard>
+            </div>
 
-      <div className="mt-5">
-        <ActivityFeed />
-      </div>
+            <div className="mt-5 grid grid-cols-1 gap-4 xl:grid-cols-2">
+              <ChartCard title="Top Universities" description="By student count">
+                <div className="h-[300px] -mx-2">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={data.topUniversities ?? []}
+                      layout="vertical"
+                      margin={{ top: 4, right: 16, left: 12, bottom: 0 }}
+                    >
+                      <CartesianGrid
+                        strokeDasharray="3 6"
+                        stroke="oklch(0.92 0.008 240)"
+                        horizontal={false}
+                      />
+                      <XAxis type="number" tickLine={false} axisLine={false} />
+                      <YAxis
+                        type="category"
+                        dataKey="university"
+                        width={110}
+                        tickLine={false}
+                        axisLine={false}
+                        tick={{ fill: "oklch(0.52 0.02 250)", fontSize: 11 }}
+                      />
+                      <Tooltip />
+                      <Bar
+                        dataKey="studentCount"
+                        name="Students"
+                        fill={chartColors[0]}
+                        radius={[0, 6, 6, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </ChartCard>
+
+              <ChartCard title="Critical Alerts" description="Items requiring attention">
+                <div className="space-y-2.5">
+                  {(data.criticalAlerts ?? []).map((alert, index) => (
+                    <div
+                      key={`${alert.alertType}-${index}`}
+                      className="flex items-start gap-3 rounded-xl border border-border p-3"
+                    >
+                      <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-accent/10 text-accent">
+                        <Bell className="h-[18px] w-[18px]" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className="truncate text-sm font-medium">{alert.title}</p>
+                          <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] capitalize">
+                            {alert.severity}
+                          </span>
+                        </div>
+                        <p className="mt-0.5 text-xs text-muted-foreground">{alert.description}</p>
+                      </div>
+                      <span className="font-semibold tabular-nums">{count(alert.count)}</span>
+                    </div>
+                  ))}
+                  {!data.criticalAlerts?.length && (
+                    <p className="py-8 text-center text-sm text-muted-foreground">
+                      No critical alerts reported.
+                    </p>
+                  )}
+                </div>
+              </ChartCard>
+            </div>
+
+            <section className="mt-5 rounded-2xl border border-border bg-card p-5 shadow-card">
+              <h3 className="text-[15px] font-semibold tracking-tight">Recent Activity</h3>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Latest events reported by the platform
+              </p>
+              <ul className="mt-3 divide-y divide-border">
+                {(data.recentActivity ?? []).map((event, index) => (
+                  <li
+                    key={`${event.eventType}-${event.occurredAt}-${index}`}
+                    className="flex flex-wrap items-start gap-2 py-3"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium">{event.description}</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">{event.eventType}</p>
+                    </div>
+                    <time className="text-xs text-muted-foreground">{event.occurredAt}</time>
+                  </li>
+                ))}
+                {!data.recentActivity?.length && (
+                  <li className="py-8 text-center text-sm text-muted-foreground">
+                    No recent activity reported.
+                  </li>
+                )}
+              </ul>
+            </section>
+          </>
+        )}
+      </DashboardQueryState>
     </DashboardLayout>
   );
 }

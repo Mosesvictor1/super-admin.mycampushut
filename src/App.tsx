@@ -1,5 +1,4 @@
-import { Routes, Route } from "react-router-dom";
-import IndexPage from "./pages/Index";
+import { Navigate, Routes, Route } from "react-router-dom";
 import PlatformPage from "./pages/Platform";
 import UsersInsightsPage from "./pages/UsersInsights";
 import FinancePage from "./pages/Finance";
@@ -13,22 +12,43 @@ import BrandPage from "./pages/Brand";
 import ReportsPage from "./pages/Reports";
 import SettingsPage from "./pages/Settings";
 import NotFoundPage from "./pages/NotFound";
+import { dashboardModules } from "./lib/dashboard-modules";
 
 export default function App() {
+  const unavailable = <Navigate to="/" replace />;
+
   return (
     <Routes>
-      <Route path="/" element={<IndexPage />} />
-      <Route path="/platform" element={<PlatformPage />} />
-      <Route path="/users" element={<UsersInsightsPage />} />
-      <Route path="/finance" element={<FinancePage />} />
-      <Route path="/jobs" element={<JobsPage />} />
-      <Route path="/assignments" element={<AssignmentsPage />} />
-      <Route path="/marketplace" element={<MarketplacePage />} />
-      <Route path="/ai-courses" element={<AiCoursesPage />} />
-      <Route path="/library" element={<LibraryPage />} />
-      <Route path="/news-blog" element={<NewsBlogPage />} />
-      <Route path="/brand" element={<BrandPage />} />
-      <Route path="/reports" element={<ReportsPage />} />
+      <Route
+        path="/"
+        element={dashboardModules.platform ? <PlatformPage /> : <Navigate to="/settings" replace />}
+      />
+      <Route
+        path="/platform"
+        element={dashboardModules.platform ? <PlatformPage /> : unavailable}
+      />
+      <Route path="/users" element={dashboardModules.users ? <UsersInsightsPage /> : unavailable} />
+      <Route path="/finance" element={dashboardModules.finance ? <FinancePage /> : unavailable} />
+      <Route path="/jobs" element={dashboardModules.jobs ? <JobsPage /> : unavailable} />
+      <Route
+        path="/assignments"
+        element={dashboardModules.assignments ? <AssignmentsPage /> : unavailable}
+      />
+      <Route
+        path="/marketplace"
+        element={dashboardModules.marketplace ? <MarketplacePage /> : unavailable}
+      />
+      <Route
+        path="/ai-courses"
+        element={dashboardModules.aiCourses ? <AiCoursesPage /> : unavailable}
+      />
+      <Route path="/library" element={dashboardModules.library ? <LibraryPage /> : unavailable} />
+      <Route
+        path="/news-blog"
+        element={dashboardModules.newsBlog ? <NewsBlogPage /> : unavailable}
+      />
+      <Route path="/brand" element={dashboardModules.brand ? <BrandPage /> : unavailable} />
+      <Route path="/reports" element={dashboardModules.reports ? <ReportsPage /> : unavailable} />
       <Route path="/settings" element={<SettingsPage />} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

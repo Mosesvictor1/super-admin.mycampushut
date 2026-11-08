@@ -10,6 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useDashboardDateRange } from "./dashboard-date-range-context";
 
 const NOTIFICATIONS = [
   { title: "32 failed payments in last 24h", meta: "Finance · critical", time: "2m" },
@@ -27,9 +28,45 @@ function formatCustomLabel(start: string, end: string) {
   return `${fmt(start)} – ${fmt(end)}`;
 }
 
+function formatDateInput(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function getRangeFilters(range: string) {
+  const end = new Date();
+  const start = new Date(end);
+
+  switch (range) {
+    case "Today":
+      break;
+    case "Last 7 days":
+      start.setDate(start.getDate() - 6);
+      break;
+    case "Last 30 days":
+      start.setDate(start.getDate() - 29);
+      break;
+    case "Last 90 days":
+      start.setDate(start.getDate() - 89);
+      break;
+    case "This quarter":
+      start.setMonth(Math.floor(start.getMonth() / 3) * 3, 1);
+      break;
+    case "Year to date":
+      start.setMonth(0, 1);
+      break;
+    default:
+      return {};
+  }
+
+  return { startDate: formatDateInput(start), endDate: formatDateInput(end) };
+}
+
 export function TopNavbar({ title, subtitle }: { title: string; subtitle?: string }) {
   const navigate = useNavigate();
-  const [range, setRange] = useState("Last 30 days");
+  const { range, filters, setDateRange } = useDashboardDateRange();
   const [q, setQ] = useState("");
 
   // Date range dropdown state
@@ -47,7 +84,10 @@ export function TopNavbar({ title, subtitle }: { title: string; subtitle?: strin
 
   const applyCustomRange = () => {
     if (!customStart || !customEnd || dateError) return;
-    setRange(formatCustomLabel(customStart, customEnd));
+    setDateRange(formatCustomLabel(customStart, customEnd), {
+      startDate: customStart,
+      endDate: customEnd,
+    });
     toast.success(`Range set to ${formatCustomLabel(customStart, customEnd)}`);
     setDateOpen(false);
     setCustomMode(false);
@@ -104,7 +144,7 @@ export function TopNavbar({ title, subtitle }: { title: string; subtitle?: strin
                   <DropdownMenuItem
                     key={r}
                     onClick={() => {
-                      setRange(r);
+                      setDateRange(r, getRangeFilters(r));
                       toast.success(`Range set to ${r}`);
                     }}
                   >
@@ -115,6 +155,8 @@ export function TopNavbar({ title, subtitle }: { title: string; subtitle?: strin
                 <DropdownMenuItem
                   onSelect={(e) => {
                     e.preventDefault();
+                    setCustomStart(filters.startDate ?? "");
+                    setCustomEnd(filters.endDate ?? "");
                     setCustomMode(true);
                   }}
                   className="gap-2"
