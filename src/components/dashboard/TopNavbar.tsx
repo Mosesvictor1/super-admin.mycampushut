@@ -267,7 +267,7 @@ export function TopNavbar({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>
-              <div className="font-semibold">Adebayo Ogunleye</div>
+              <div className="font-semibold">Victor Moses</div>
               <div className="text-[11px] font-normal text-muted-foreground">
                 admin@campushut.io
               </div>

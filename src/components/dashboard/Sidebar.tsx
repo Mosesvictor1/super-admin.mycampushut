@@ -123,7 +123,7 @@ export function Sidebar() {
           </div>
           {!collapsed && (
             <div className="min-w-0 flex-1">
-              <div className="text-sm font-medium text-white truncate">Adebayo Ogunleye</div>
+              <div className="text-sm font-medium text-white truncate">Victor Moses</div>
               <div className="flex items-center gap-1 text-[11px] text-sidebar-muted">
                 <ShieldCheck className="h-3 w-3 text-[oklch(0.85_0.18_148)]" />
                 Super Admin
