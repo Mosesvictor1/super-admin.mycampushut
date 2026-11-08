@@ -68,7 +68,12 @@ export interface PlatformOverview {
 }
 
 export interface PaymentOverview {
-  summary?: Summary;
+  summary?: {
+    successfulTransactions?: number;
+    failedTransactions?: number;
+    failureRatePercent?: number;
+    totalRevenue?: { currency: string; revenue: number }[];
+  };
   revenueTrend?: { month: string; currency: string; revenue: number }[];
   revenueByType?: {
     paymentType: string;
@@ -83,7 +88,7 @@ export interface PaymentOverview {
     transactions: number;
   }[];
   recentTransactions?: {
-    transactionId: number;
+    transactionId: number | null;
     reference: string;
     amount: number;
     currency: string;
@@ -95,7 +100,12 @@ export interface PaymentOverview {
 }
 
 export interface AICourseOverview {
-  summary?: Summary;
+  summary?: {
+    enrollments?: number;
+    completionRatePercent?: number;
+    aiTutorSessions?: number;
+    csatScore?: number | null;
+  };
   enrollmentTrend?: {
     month: string;
     enrollments: number;

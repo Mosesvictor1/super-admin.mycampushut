@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { GraduationCap, MessagesSquare, Timer, UserPlus, Zap, Sparkles } from "lucide-react";
+import { GraduationCap, MessagesSquare, Timer, Sparkles, CheckCircle2, Star } from "lucide-react";
 import {
   Area,
   AreaChart,
@@ -40,13 +40,10 @@ export default function AiCoursesPage() {
         rangeLabel: "Last 30 days",
         filters,
         summary: [
-          { metric: "New students (30 days)", value: summary?.newStudents30Days ?? "—" },
-          { metric: "30-day retention (%)", value: summary?.retention30DayPercent ?? "—" },
-          {
-            metric: "Average session duration (minutes)",
-            value: summary?.averageSessionDurationMinutes ?? "—",
-          },
-          { metric: "Activation rate (%)", value: summary?.activationRatePercent ?? "—" },
+          { metric: "Enrollments", value: summary?.enrollments ?? "—" },
+          { metric: "Completion rate (%)", value: summary?.completionRatePercent ?? "—" },
+          { metric: "AI tutor sessions", value: summary?.aiTutorSessions ?? "—" },
+          { metric: "CSAT score", value: summary?.csatScore ?? "—" },
           { metric: "Top courses", value: data.topCourses?.length ?? 0 },
         ],
         sheets: [
@@ -94,31 +91,29 @@ export default function AiCoursesPage() {
           <>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <MiniStat
-                icon={UserPlus}
-                tone="primary"
-                label="New Students (30D)"
-                value={number(summary?.newStudents30Days)}
-              />
-              <MiniStat
                 icon={GraduationCap}
+                tone="primary"
+                label="Enrollments"
+                value={number(summary?.enrollments)}
+              />
+              <MiniStat
+                icon={CheckCircle2}
                 tone="blue"
-                label="30-Day Retention"
-                value={summary?.retention30DayPercent ?? "—"}
-                suffix={summary ? "%" : undefined}
+                label="Completion Rate"
+                value={summary?.completionRatePercent ?? "—"}
+                suffix={summary?.completionRatePercent !== undefined ? "%" : undefined}
               />
               <MiniStat
-                icon={Timer}
+                icon={MessagesSquare}
                 tone="violet"
-                label="Avg. Session Duration"
-                value={summary?.averageSessionDurationMinutes ?? "—"}
-                suffix={summary ? "min" : undefined}
+                label="AI Tutor Sessions"
+                value={number(summary?.aiTutorSessions)}
               />
               <MiniStat
-                icon={Zap}
+                icon={Star}
                 tone="accent"
-                label="Activation Rate"
-                value={summary?.activationRatePercent ?? "—"}
-                suffix={summary ? "%" : undefined}
+                label="CSAT Score"
+                value={summary?.csatScore ?? "—"}
               />
             </div>
 

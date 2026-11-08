@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CheckCircle2, Timer, UserPlus, Users, XCircle, RotateCcw, Zap } from "lucide-react";
+import { CheckCircle2, XCircle, RotateCcw, BadgePercent, CircleDollarSign } from "lucide-react";
 import {
   Bar,
   BarChart,
@@ -88,19 +88,22 @@ export default function FinancePage() {
   const revenueCurrencies = Array.from(
     new Set((data?.revenueTrend ?? []).map((item) => item.currency)),
   );
+  const totalRevenue = summary?.totalRevenue
+    ?.map(
+      ({ currency, revenue }) =>
+        `${currency} ${revenue.toLocaleString(undefined, { maximumFractionDigits: 2 })}`,
+    )
+    .join(", ");
   const exportData: DashboardExportData | undefined = data
     ? {
         reportTitle: "Finance and Subscription",
         rangeLabel: "Last 30 days",
         filters,
         summary: [
-          { metric: "New students (30 days)", value: summary?.newStudents30Days ?? "—" },
-          { metric: "30-day retention (%)", value: summary?.retention30DayPercent ?? "—" },
-          {
-            metric: "Average session duration (minutes)",
-            value: summary?.averageSessionDurationMinutes ?? "—",
-          },
-          { metric: "Activation rate (%)", value: summary?.activationRatePercent ?? "—" },
+          { metric: "Successful transactions", value: summary?.successfulTransactions ?? "—" },
+          { metric: "Failed transactions", value: summary?.failedTransactions ?? "—" },
+          { metric: "Failure rate (%)", value: summary?.failureRatePercent ?? "—" },
+          { metric: "Total revenue", value: totalRevenue || "—" },
           { metric: "Recent transactions", value: transactions.length },
         ],
         sheets: [
@@ -162,31 +165,29 @@ export default function FinancePage() {
           <>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <MiniStat
-                icon={UserPlus}
+                icon={CheckCircle2}
                 tone="primary"
-                label="New Students (30D)"
-                value={number(summary?.newStudents30Days)}
+                label="Successful Transactions"
+                value={number(summary?.successfulTransactions)}
               />
               <MiniStat
-                icon={Users}
+                icon={XCircle}
                 tone="blue"
-                label="30-Day Retention"
-                value={summary?.retention30DayPercent ?? "—"}
-                suffix={summary ? "%" : undefined}
+                label="Failed Transactions"
+                value={number(summary?.failedTransactions)}
               />
               <MiniStat
-                icon={Timer}
+                icon={BadgePercent}
                 tone="violet"
-                label="Avg. Session Duration"
-                value={summary?.averageSessionDurationMinutes ?? "—"}
-                suffix={summary ? "min" : undefined}
+                label="Failure Rate"
+                value={summary?.failureRatePercent ?? "—"}
+                suffix={summary?.failureRatePercent !== undefined ? "%" : undefined}
               />
               <MiniStat
-                icon={Zap}
+                icon={CircleDollarSign}
                 tone="accent"
-                label="Activation Rate"
-                value={summary?.activationRatePercent ?? "—"}
-                suffix={summary ? "%" : undefined}
+                label="Total Revenue"
+                value={totalRevenue || "—"}
               />
             </div>
 
