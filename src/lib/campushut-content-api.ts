@@ -24,6 +24,37 @@ export interface AppVersionRequest {
   active: boolean;
 }
 
+export interface Advertiser {
+  id: number;
+  companyName: string;
+  contactName: string;
+  logoURL?: string | null;
+  email: string;
+  phone: string;
+  active: boolean;
+  [key: string]: unknown;
+}
+
+export interface AdCampaign {
+  id: number;
+  advertiserId?: number;
+  advertiserName?: string;
+  title: string;
+  description?: string;
+  bannerUrl?: string;
+  ctaText?: string;
+  ctaUrl?: string;
+  placement?: string;
+  priority?: string;
+  status?: string;
+  startDate?: string;
+  endDate?: string;
+  maxImpressions?: number;
+  currentImpressions?: number;
+  currentClicks?: number;
+  [key: string]: unknown;
+}
+
 export interface ApiRequestOptions extends RequestInit {
   query?: Record<string, string | number | boolean | undefined>;
 }
@@ -60,7 +91,17 @@ export function readArrayPayload<T>(value: unknown, keys: string[] = []): T[] {
   if (Array.isArray(value)) return value as T[];
   if (!value || typeof value !== "object") return [];
   const record = value as Record<string, unknown>;
-  for (const key of [...keys, "content", "items", "data", "results", "campaigns", "advertisers"]) {
+  for (const key of [
+    ...keys,
+    "content",
+    "items",
+    "data",
+    "results",
+    "campaigns",
+    "advertisers",
+    "Advertiser",
+    "advertiser",
+  ]) {
     const nested = record[key];
     if (Array.isArray(nested)) return nested as T[];
     if (nested && typeof nested === "object") {
@@ -130,13 +171,21 @@ export const contentApi = {
       const form = new FormData();
       form.set("request", JSON.stringify(request));
       if (image) form.set("images", image);
-      return contentApiRequest<unknown>("/api/createAdvertiser", { method: "POST", body: form });
+      return contentApiRequest<unknown>("/api/createAdvertiser", {
+        method: "POST",
+        query: { request: JSON.stringify(request) },
+        body: form,
+      });
     },
     update: (id: number, request: Record<string, unknown>, image?: File | null) => {
       const form = new FormData();
       form.set("request", JSON.stringify(request));
       if (image) form.set("images", image);
-      return contentApiRequest<unknown>(`/api/updateAdvertiser/${id}`, { method: "POST", body: form });
+      return contentApiRequest<unknown>(`/api/updateAdvertiser/${id}`, {
+        method: "POST",
+        query: { request: JSON.stringify(request) },
+        body: form,
+      });
     },
     deactivate: (id: number) =>
       contentApiRequest<unknown>(`/api/${id}/deactivate`, { method: "PATCH" }),
@@ -167,7 +216,7 @@ export const contentApi = {
       if (image) form.set("banner", image);
       return contentApiRequest<unknown>("/api/ad-campaigns/updateCampaign", {
         method: "POST",
-        query: { campaignId: id },
+        query: { campaignId: id, id, request: JSON.stringify({ ...request, id }) },
         body: form,
       });
     },
