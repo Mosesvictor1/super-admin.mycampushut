@@ -16,6 +16,7 @@ import {
   GraduationCap,
   Newspaper,
   Megaphone,
+  Smartphone,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -34,6 +35,8 @@ const NAV = [
   { to: "/ai-courses", label: "AI Courses", icon: Sparkles, module: "aiCourses" },
   { to: "/library", label: "Learning Library", icon: BookOpen, module: "library" },
   { to: "/news-blog", label: "News & Blog", icon: Newspaper, module: "newsBlog" },
+  { to: "/app-versions", label: "Mobile App Versions", icon: Smartphone, module: "mobileVersions" },
+  { to: "/ads-manager", label: "Ads Manager", icon: Megaphone, module: "adsManager" },
   { to: "/brand", label: "Brand Ads", icon: Megaphone, module: "brand" },
   { to: "/reports", label: "Reports", icon: FileBarChart, module: "reports" },
 ] satisfies {

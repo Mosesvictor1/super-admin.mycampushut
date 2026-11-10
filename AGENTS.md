@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+Use `src/lib/campushut-content-api.ts` as the single browser client for CampusHut news, app-version, advertiser, and ad-campaign endpoints; normalize unknown response envelopes at page boundaries because the API schemas are inconsistent.

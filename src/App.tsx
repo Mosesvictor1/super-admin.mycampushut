@@ -10,6 +10,8 @@ import LibraryPage from "./pages/Library";
 import NewsBlogPage from "./pages/NewsBlog";
 import BrandPage from "./pages/Brand";
 import ReportsPage from "./pages/Reports";
+import AppVersionsPage from "./pages/AppVersions";
+import AdsManagerPage from "./pages/AdsManager";
 import NotFoundPage from "./pages/NotFound";
 import { dashboardModules } from "./lib/dashboard-modules";
 
@@ -42,6 +44,14 @@ export default function App() {
       <Route
         path="/news-blog"
         element={dashboardModules.newsBlog ? <NewsBlogPage /> : unavailable}
+      />
+      <Route
+        path="/app-versions"
+        element={dashboardModules.mobileVersions ? <AppVersionsPage /> : unavailable}
+      />
+      <Route
+        path="/ads-manager"
+        element={dashboardModules.adsManager ? <AdsManagerPage /> : unavailable}
       />
       <Route path="/brand" element={dashboardModules.brand ? <BrandPage /> : unavailable} />
       <Route path="/reports" element={dashboardModules.reports ? <ReportsPage /> : unavailable} />
