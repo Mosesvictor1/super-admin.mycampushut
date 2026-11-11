@@ -12,12 +12,14 @@ import {
   MoreHorizontal,
   MousePointer2,
   Pause,
+  Pencil,
   Play,
   Plus,
   RefreshCw,
   Search,
   ShieldBan,
   Target,
+  UserRoundPen,
   Users,
 } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
@@ -100,6 +102,8 @@ export default function AdsManagerPage() {
   const [advertiserDialog, setAdvertiserDialog] = useState(false);
   const [campaignForm, setCampaignForm] = useState<CampaignForm>(emptyCampaign);
   const [advertiserForm, setAdvertiserForm] = useState<AdvertiserForm>(emptyAdvertiser);
+  const [editingCampaign, setEditingCampaign] = useState<AdCampaign | null>(null);
+  const [editingAdvertiser, setEditingAdvertiser] = useState<Advertiser | null>(null);
   const [campaignImage, setCampaignImage] = useState<File | null>(null);
   const [advertiserImage, setAdvertiserImage] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
@@ -164,21 +168,52 @@ export default function AdsManagerPage() {
   const filtered = useMemo(() => campaigns.filter((campaign) => {
     const matchesText = [campaign.title, campaign.advertiserName, campaign.placement]
       .some((value) => String(value ?? "").toLowerCase().includes(query.toLowerCase()));
-    const matchesStatus = filter === "All campaigns" || (campaign.status ?? "").toLowerCase() === filter.toLowerCase();
+    const status = (campaign.status ?? "").toLowerCase();
+    const matchesStatus = filter === "All campaigns" ||
+      (filter === "Pending" ? status.includes("pending") || status.includes("review") :
+        filter === "Active" ? status.includes("active") || status.includes("approved") :
+          filter === "Paused" ? status.includes("pause") :
+            filter === "Completed" ? status.includes("complete") || status.includes("ended") : status === filter.toLowerCase());
     return matchesText && matchesStatus;
   }), [campaigns, query, filter]);
 
-  const openCampaign = () => {
-    setCampaignForm({ ...emptyCampaign, placement: placements[0] ?? "", priority: priorities[0]?.name ?? "" });
+  const openCampaign = (campaign?: AdCampaign) => {
+    setEditingCampaign(campaign ?? null);
+    setCampaignForm(campaign ? {
+      advertiserId: String(campaign.advertiserId ?? ""),
+      title: campaign.title,
+      description: campaign.description ?? "",
+      ctaText: campaign.ctaText ?? "Learn more",
+      ctaUrl: campaign.ctaUrl ?? "",
+      placement: campaign.placement ?? placements[0] ?? "",
+      priority: campaign.priority ?? priorities[0]?.name ?? "",
+      startDate: dateInput(campaign.startDate),
+      endDate: dateInput(campaign.endDate),
+      maxImpressions: String(campaign.maxImpressions ?? ""),
+    } : { ...emptyCampaign, placement: placements[0] ?? "", priority: priorities[0]?.name ?? "" });
     setCampaignImage(null);
     setCampaignDialog(true);
+  };
+
+  const openAdvertiser = (advertiser?: Advertiser) => {
+    setEditingAdvertiser(advertiser ?? null);
+    setAdvertiserForm(advertiser ? {
+      companyName: advertiser.companyName,
+      contactName: advertiser.contactName,
+      email: advertiser.email,
+      phone: advertiser.phone,
+    } : emptyAdvertiser);
+    setAdvertiserImage(null);
+    setAdvertiserDialog(true);
   };
 
   const submitCampaign = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!liveCampaigns) { toast.error("Campaign service is unavailable; sample records are read-only."); return; }
+    const advertiserId = Number(campaignForm.advertiserId);
+    const maxImpressions = Number(campaignForm.maxImpressions);
     const payload: Record<string, unknown> = {
-      advertiserId: Number(campaignForm.advertiserId),
+      advertiserId,
       title: campaignForm.title.trim(),
       description: campaignForm.description.trim(),
       ctaText: campaignForm.ctaText.trim(),
@@ -187,14 +222,20 @@ export default function AdsManagerPage() {
       priority: campaignForm.priority,
       startDate: campaignForm.startDate,
       endDate: campaignForm.endDate,
-      maxImpressions: Number(campaignForm.maxImpressions),
+      maxImpressions,
     };
-    if (!Number.isFinite(payload.advertiserId) || !Number.isFinite(payload.maxImpressions)) { toast.error("Select an advertiser and valid impression limit."); return; }
+    if (!Number.isFinite(advertiserId) || advertiserId <= 0 || !Number.isFinite(maxImpressions) || maxImpressions <= 0) { toast.error("Select an advertiser and valid impression limit."); return; }
     setSaving(true);
     try {
-      await contentApi.ads.create(payload, campaignImage);
-      toast.success("Campaign created");
+      if (editingCampaign?.id) {
+        await contentApi.ads.update(editingCampaign.id, payload, campaignImage);
+        toast.success("Campaign updated");
+      } else {
+        await contentApi.ads.create(payload, campaignImage);
+        toast.success("Campaign created");
+      }
       setCampaignDialog(false);
+      setEditingCampaign(null);
       await loadData();
     } catch (cause) {
       toast.error(cause instanceof Error ? cause.message : "Campaign could not be created.");
@@ -206,15 +247,33 @@ export default function AdsManagerPage() {
     if (!liveAdvertisers) { toast.error("Advertiser service is unavailable."); return; }
     setSaving(true);
     try {
-      await contentApi.advertisers.create(advertiserForm, advertiserImage);
-      toast.success("Advertiser created");
+      if (editingAdvertiser?.id) {
+        await contentApi.advertisers.update(editingAdvertiser.id, advertiserForm, advertiserImage);
+        toast.success("Advertiser updated");
+      } else {
+        await contentApi.advertisers.create(advertiserForm, advertiserImage);
+        toast.success("Advertiser created");
+      }
       setAdvertiserDialog(false);
+      setEditingAdvertiser(null);
       setAdvertiserForm(emptyAdvertiser);
       setAdvertiserImage(null);
       await loadData();
     } catch (cause) {
       toast.error(cause instanceof Error ? cause.message : "Advertiser could not be created.");
     } finally { setSaving(false); }
+  };
+
+  const deactivateAdvertiser = async (advertiser: Advertiser) => {
+    if (!liveAdvertisers) return;
+    if (!window.confirm(`Deactivate ${advertiser.companyName}?`)) return;
+    try {
+      await contentApi.advertisers.deactivate(advertiser.id);
+      toast.success("Advertiser deactivated");
+      await loadData();
+    } catch (cause) {
+      toast.error(cause instanceof Error ? cause.message : "Advertiser could not be deactivated.");
+    }
   };
 
   const changeCampaignStatus = async (campaign: AdCampaign, action: "pause" | "resume" | "complete" | "archive" | "approve") => {
@@ -291,6 +350,7 @@ export default function AdsManagerPage() {
                     <td className="py-4 pr-4"><Badge variant="outline" className={cn("border-0", statusTone(campaign.status))}>{campaign.status ?? "Unknown"}</Badge></td>
                     <td className="py-3"><div className="flex items-center gap-1">
                       <Button variant="ghost" size="icon" aria-label={`View ${campaign.title} analytics`} title="View analytics" onClick={() => void openDetails(campaign)}><BarChart3 /></Button>
+                      <Button variant="ghost" size="icon" aria-label={`Edit ${campaign.title}`} title="Edit campaign" disabled={!liveCampaigns} onClick={() => openCampaign(campaign)}><Pencil /></Button>
                       {/pending|review/i.test(campaign.status ?? "") && <Button variant="ghost" size="icon" aria-label={`Approve ${campaign.title}`} title="Approve" disabled={!liveCampaigns} onClick={() => void changeCampaignStatus(campaign, "approve")}><Check /></Button>}
                       {/active/i.test(campaign.status ?? "") ? <Button variant="ghost" size="icon" aria-label={`Pause ${campaign.title}`} title="Pause campaign" disabled={!liveCampaigns} onClick={() => void changeCampaignStatus(campaign, "pause")}><Pause /></Button> : /pause/i.test(campaign.status ?? "") ? <Button variant="ghost" size="icon" aria-label={`Resume ${campaign.title}`} title="Resume campaign" disabled={!liveCampaigns} onClick={() => void changeCampaignStatus(campaign, "resume")}><Play /></Button> : null}
                       <details className="relative"><summary className="grid h-9 w-9 cursor-pointer list-none place-items-center rounded-md hover:bg-muted" aria-label={`More actions for ${campaign.title}`}><MoreHorizontal className="h-4 w-4" /></summary><div className="absolute right-0 z-10 mt-1 w-40 rounded-md border border-border bg-popover p-1 shadow-md"><button className="flex w-full items-center gap-2 rounded px-2 py-2 text-left text-xs hover:bg-muted disabled:opacity-50" disabled={!liveCampaigns} onClick={() => void changeCampaignStatus(campaign, "complete")}><Check className="h-3.5 w-3.5" />Mark complete</button><button className="flex w-full items-center gap-2 rounded px-2 py-2 text-left text-xs hover:bg-muted disabled:opacity-50" disabled={!liveCampaigns} onClick={() => void changeCampaignStatus(campaign, "archive")}><ShieldBan className="h-3.5 w-3.5" />Archive campaign</button></div></details>
@@ -311,17 +371,17 @@ export default function AdsManagerPage() {
               ["Paused campaigns", metrics.pausedCampaigns ?? campaigns.filter((campaign) => /pause/i.test(campaign.status ?? "")).length],
               ["Pending review", pendingCount],
               ["Total clicks", totalClicks.toLocaleString()],
-            ].map(([label, value]) => <div key={String(label)} className="flex items-center justify-between gap-3 py-3 text-sm"><dt className="text-muted-foreground">{label}</dt><dd className="font-semibold tabular-nums">{value}</dd></div>)}</dl>
+            ].map(([label, value]) => <div key={String(label)} className="flex items-center justify-between gap-3 py-3 text-sm"><dt className="text-muted-foreground">{String(label)}</dt><dd className="font-semibold tabular-nums">{String(value)}</dd></div>)}</dl>
           </section>
           <section aria-labelledby="advertisers-title">
             <div className="flex items-center justify-between border-b border-border pb-3"><div><h2 id="advertisers-title" className="text-base font-semibold">Advertisers</h2><p className="mt-1 text-sm text-muted-foreground">{advertisers.length} live accounts</p></div><Button variant="outline" size="sm" onClick={() => { setAdvertiserForm(emptyAdvertiser); setAdvertiserImage(null); setAdvertiserDialog(true); }} disabled={!liveAdvertisers} aria-label="Add advertiser"><Plus /></Button></div>
-            {advertisers.length ? <div className="divide-y divide-border">{advertisers.slice(0, 6).map((advertiser) => <div key={advertiser.id} className="flex items-center gap-3 py-3"><div className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full bg-muted">{advertiser.logoURL ? <img src={advertiser.logoURL} alt="" className="h-full w-full object-cover" /> : <Building2 className="h-4 w-4 text-muted-foreground" />}</div><div className="min-w-0 flex-1"><p className="truncate text-sm font-medium">{advertiser.companyName}</p><p className="truncate text-xs text-muted-foreground">{advertiser.contactName}</p></div><Badge variant="outline" className={advertiser.active ? "border-0 bg-primary-soft text-primary" : "border-0 bg-muted text-muted-foreground"}>{advertiser.active ? "Active" : "Inactive"}</Badge></div>)}</div> : <div className="py-6 text-center text-sm text-muted-foreground">{liveAdvertisers ? "No advertiser accounts yet." : "Live advertiser accounts unavailable."}</div>}
+            {advertisers.length ? <div className="divide-y divide-border">{advertisers.slice(0, 6).map((advertiser) => <div key={advertiser.id} className="flex items-center gap-3 py-3"><div className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full bg-muted">{advertiser.logoURL ? <img src={advertiser.logoURL} alt="" className="h-full w-full object-cover" /> : <Building2 className="h-4 w-4 text-muted-foreground" />}</div><div className="min-w-0 flex-1"><p className="truncate text-sm font-medium">{advertiser.companyName}</p><p className="truncate text-xs text-muted-foreground">{advertiser.contactName}</p></div><Badge variant="outline" className={advertiser.active ? "border-0 bg-primary-soft text-primary" : "border-0 bg-muted text-muted-foreground"}>{advertiser.active ? "Active" : "Inactive"}</Badge><Button variant="ghost" size="icon" aria-label={`Edit ${advertiser.companyName}`} disabled={!liveAdvertisers} onClick={() => openAdvertiser(advertiser)}><UserRoundPen /></Button><Button variant="ghost" size="icon" aria-label={`Deactivate ${advertiser.companyName}`} disabled={!liveAdvertisers || !advertiser.active} onClick={() => void deactivateAdvertiser(advertiser)}><ShieldBan /></Button></div>)}</div> : <div className="py-6 text-center text-sm text-muted-foreground">{liveAdvertisers ? "No advertiser accounts yet." : "Live advertiser accounts unavailable."}</div>}
           </section>
         </aside>
       </div>
 
       <Dialog open={campaignDialog} onOpenChange={setCampaignDialog}>
-        <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto"><DialogHeader><DialogTitle>Create campaign</DialogTitle><DialogDescription>Set the advertiser, placement, dates, and impression limit.</DialogDescription></DialogHeader>
+        <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto"><DialogHeader><DialogTitle>{editingCampaign ? "Edit campaign" : "Create campaign"}</DialogTitle><DialogDescription>Set the advertiser, placement, dates, and impression limit.</DialogDescription></DialogHeader>
           <form className="space-y-4" onSubmit={submitCampaign}>
             <div className="space-y-1.5"><Label>Advertiser</Label><Select value={campaignForm.advertiserId} onValueChange={(value) => setCampaignForm({ ...campaignForm, advertiserId: value })}><SelectTrigger><SelectValue placeholder="Select advertiser" /></SelectTrigger><SelectContent>{advertisers.filter((advertiser) => advertiser.active).map((advertiser) => <SelectItem key={advertiser.id} value={String(advertiser.id)}>{advertiser.companyName}</SelectItem>)}</SelectContent></Select></div>
             <div className="space-y-1.5"><Label htmlFor="campaign-title">Campaign title</Label><Input id="campaign-title" value={campaignForm.title} onChange={(event) => setCampaignForm({ ...campaignForm, title: event.target.value })} required /></div>
@@ -331,14 +391,14 @@ export default function AdsManagerPage() {
             <div className="grid gap-3 sm:grid-cols-2"><div className="space-y-1.5"><Label htmlFor="campaign-limit">Impression limit</Label><Input id="campaign-limit" type="number" min="1" step="1" value={campaignForm.maxImpressions} onChange={(event) => setCampaignForm({ ...campaignForm, maxImpressions: event.target.value })} required /></div><div className="space-y-1.5"><Label htmlFor="campaign-cta">Button label</Label><Input id="campaign-cta" value={campaignForm.ctaText} onChange={(event) => setCampaignForm({ ...campaignForm, ctaText: event.target.value })} required /></div></div>
             <div className="space-y-1.5"><Label htmlFor="campaign-url">Destination URL</Label><Input id="campaign-url" type="url" value={campaignForm.ctaUrl} onChange={(event) => setCampaignForm({ ...campaignForm, ctaUrl: event.target.value })} required /></div>
             <div className="space-y-1.5"><Label htmlFor="campaign-banner">Campaign banner</Label><Input id="campaign-banner" type="file" accept="image/*" onChange={(event) => setCampaignImage(event.target.files?.[0] ?? null)} /></div>
-            <DialogFooter><Button type="button" variant="outline" onClick={() => setCampaignDialog(false)}>Cancel</Button><Button type="submit" disabled={saving || advertisers.filter((advertiser) => advertiser.active).length === 0}>{saving ? <LoaderCircle className="animate-spin" /> : <Plus />} Create campaign</Button></DialogFooter>
+            <DialogFooter><Button type="button" variant="outline" onClick={() => setCampaignDialog(false)}>Cancel</Button><Button type="submit" disabled={saving || advertisers.filter((advertiser) => advertiser.active).length === 0}>{saving ? <LoaderCircle className="animate-spin" /> : editingCampaign ? <Pencil /> : <Plus />}{editingCampaign ? "Save changes" : "Create campaign"}</Button></DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
 
       <Dialog open={advertiserDialog} onOpenChange={setAdvertiserDialog}>
-        <DialogContent className="max-w-lg"><DialogHeader><DialogTitle>Add advertiser</DialogTitle><DialogDescription>Create an advertiser account for campaign management.</DialogDescription></DialogHeader>
-          <form className="space-y-4" onSubmit={submitAdvertiser}>{(["companyName", "contactName", "email", "phone"] as const).map((field) => <div key={field} className="space-y-1.5"><Label htmlFor={`advertiser-${field}`}>{({ companyName: "Company name", contactName: "Contact name", email: "Email address", phone: "Phone number" })[field]}</Label><Input id={`advertiser-${field}`} type={field === "email" ? "email" : "text"} value={advertiserForm[field]} onChange={(event) => setAdvertiserForm({ ...advertiserForm, [field]: event.target.value })} required /></div>)}<div className="space-y-1.5"><Label htmlFor="advertiser-logo">Company logo</Label><Input id="advertiser-logo" type="file" accept="image/*" onChange={(event) => setAdvertiserImage(event.target.files?.[0] ?? null)} /></div><DialogFooter><Button type="button" variant="outline" onClick={() => setAdvertiserDialog(false)}>Cancel</Button><Button type="submit" disabled={saving}>{saving ? <LoaderCircle className="animate-spin" /> : <Plus />} Add advertiser</Button></DialogFooter></form>
+        <DialogContent className="max-w-lg"><DialogHeader><DialogTitle>{editingAdvertiser ? "Edit advertiser" : "Add advertiser"}</DialogTitle><DialogDescription>Manage an advertiser account for campaigns.</DialogDescription></DialogHeader>
+          <form className="space-y-4" onSubmit={submitAdvertiser}>{(["companyName", "contactName", "email", "phone"] as const).map((field) => <div key={field} className="space-y-1.5"><Label htmlFor={`advertiser-${field}`}>{({ companyName: "Company name", contactName: "Contact name", email: "Email address", phone: "Phone number" })[field]}</Label><Input id={`advertiser-${field}`} type={field === "email" ? "email" : "text"} value={advertiserForm[field]} onChange={(event) => setAdvertiserForm({ ...advertiserForm, [field]: event.target.value })} required /></div>)}<div className="space-y-1.5"><Label htmlFor="advertiser-logo">Company logo</Label><Input id="advertiser-logo" type="file" accept="image/*" onChange={(event) => setAdvertiserImage(event.target.files?.[0] ?? null)} /></div><DialogFooter><Button type="button" variant="outline" onClick={() => setAdvertiserDialog(false)}>Cancel</Button><Button type="submit" disabled={saving}>{saving ? <LoaderCircle className="animate-spin" /> : editingAdvertiser ? <Pencil /> : <Plus />}{editingAdvertiser ? "Save changes" : "Add advertiser"}</Button></DialogFooter></form>
         </DialogContent>
       </Dialog>
 
@@ -346,7 +406,7 @@ export default function AdsManagerPage() {
         <DialogContent className="max-h-[85vh] max-w-xl overflow-y-auto"><DialogHeader><DialogTitle>{selectedCampaign?.title ?? "Campaign details"}</DialogTitle><DialogDescription>{selectedCampaign?.advertiserName ?? "Campaign performance and delivery"}</DialogDescription></DialogHeader>
           {detailsLoading ? <div className="flex items-center gap-2 py-10 text-sm text-muted-foreground"><LoaderCircle className="h-4 w-4 animate-spin" />Loading campaign details…</div> : campaignDetails ? <div className="space-y-4">
             {selectedCampaign?.bannerUrl && <img src={selectedCampaign.bannerUrl} alt="Campaign banner" className="max-h-52 w-full rounded-lg object-cover" />}
-            <div className="grid grid-cols-2 gap-3">{[["Status", campaignDetails.status], ["Placement", campaignDetails.placement], ["Impressions", campaignDetails.impressions ?? campaignDetails.currentImpressions], ["Clicks", campaignDetails.clicks ?? campaignDetails.currentClicks], ["CTR", typeof campaignDetails.ctr === "number" ? `${campaignDetails.ctr}%` : "—"], ["Impression limit", campaignDetails.maxImpressions]].map(([label, value]) => <div key={String(label)} className="border-b border-border py-2"><p className="text-xs text-muted-foreground">{label}</p><p className="mt-1 text-sm font-semibold">{value === undefined || value === null ? "—" : String(value)}</p></div>)}</div>
+            <div className="grid grid-cols-2 gap-3">{[["Status", campaignDetails.status], ["Placement", campaignDetails.placement], ["Impressions", campaignDetails.impressions ?? campaignDetails.currentImpressions], ["Clicks", campaignDetails.clicks ?? campaignDetails.currentClicks], ["CTR", typeof campaignDetails.ctr === "number" ? `${campaignDetails.ctr}%` : "—"], ["Impression limit", campaignDetails.maxImpressions]].map(([label, value]) => <div key={String(label)} className="border-b border-border py-2"><p className="text-xs text-muted-foreground">{String(label)}</p><p className="mt-1 text-sm font-semibold">{value === undefined || value === null ? "—" : String(value)}</p></div>)}</div>
             {campaignDetails.ctaUrl && <a href={String(campaignDetails.ctaUrl)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm text-primary hover:underline">Open campaign link <ExternalLink className="h-3.5 w-3.5" /></a>}
           </div> : <p className="py-8 text-sm text-muted-foreground">Campaign detail and analytics are unavailable for this sample record.</p>}
           <DialogFooter><Button variant="outline" onClick={() => setSelectedCampaign(null)}>Close</Button><Button variant="secondary" onClick={() => { if (selectedCampaign?.ctaUrl) window.open(selectedCampaign.ctaUrl, "_blank", "noopener,noreferrer"); }} disabled={!selectedCampaign?.ctaUrl}>Visit destination <ArrowUpRight /></Button></DialogFooter>

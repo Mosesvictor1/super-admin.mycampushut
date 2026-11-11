@@ -26,11 +26,11 @@ import { contentApi, type AppVersionRequest } from "@/lib/campushut-content-api"
 import { toast } from "sonner";
 
 type Platform = AppVersionRequest["platform"];
-type ReleaseForm = { platform: Platform; version: string; buildNumber: string; downloadUrl: string; active: boolean };
+type ReleaseForm = { platform: Platform; version: string; buildNumber: string; downloadUrl: string; active: boolean; existingId: string };
 type CheckResult = { status: "idle" | "loading" | "success" | "error"; value?: unknown; error?: string };
 type CreatedRelease = AppVersionRequest & { id?: number; createdAt: string };
 
-const emptyForm: ReleaseForm = { platform: "ANDROID", version: "", buildNumber: "", downloadUrl: "", active: true };
+const emptyForm: ReleaseForm = { platform: "ANDROID", version: "", buildNumber: "", downloadUrl: "", active: true, existingId: "" };
 const formatValue = (value: unknown) => {
   if (value === null || value === undefined || value === "") return "No value returned";
   if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") return String(value);
@@ -90,11 +90,19 @@ export default function AppVersionsPage() {
     }
     setSaving(true);
     try {
-      const response = await contentApi.versions.create(request);
+      const existingId = Number(form.existingId);
+      if (form.existingId && (!Number.isInteger(existingId) || existingId <= 0)) {
+        toast.error("Enter a valid existing version ID, or leave it blank to create a release.");
+        setSaving(false);
+        return;
+      }
+      const response = form.existingId
+        ? await contentApi.versions.update(existingId, request)
+        : await contentApi.versions.create(request);
       const id = response && typeof response === "object" && "id" in response
         ? Number((response as { id: unknown }).id) : undefined;
       setReleases((all) => [{ ...request, id: Number.isFinite(id) ? id : undefined, createdAt: new Date().toISOString() }, ...all]);
-      toast.success("App version created");
+      toast.success(form.existingId ? "App version updated" : "App version created");
       setOpen(false);
       setForm(emptyForm);
       void runAdminCheck(request.platform);
@@ -184,11 +192,12 @@ export default function AppVersionsPage() {
         <DialogContent className="max-w-lg">
           <DialogHeader><DialogTitle>Create app version</DialogTitle><DialogDescription>Register a release using the documented Android and iOS fields.</DialogDescription></DialogHeader>
           <form onSubmit={submitRelease} className="space-y-4">
+            <div className="space-y-1.5"><Label htmlFor="existing-version-id">Existing version ID <span className="font-normal text-muted-foreground">(leave blank to create)</span></Label><Input id="existing-version-id" type="number" min="1" value={form.existingId} onChange={(event) => setForm({ ...form, existingId: event.target.value })} placeholder="Optional ID to update" /></div>
             <div className="space-y-1.5"><Label>Platform</Label><Select value={form.platform} onValueChange={(value: Platform) => setForm({ ...form, platform: value })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="ANDROID">Android</SelectItem><SelectItem value="IOS">iOS</SelectItem></SelectContent></Select></div>
             <div className="grid grid-cols-2 gap-3"><div className="space-y-1.5"><Label htmlFor="version-name">Version</Label><Input id="version-name" value={form.version} onChange={(event) => setForm({ ...form, version: event.target.value })} placeholder="2.4.0" required /></div><div className="space-y-1.5"><Label htmlFor="build-number">Build number</Label><Input id="build-number" value={form.buildNumber} onChange={(event) => setForm({ ...form, buildNumber: event.target.value })} type="number" min="0" step="1" placeholder="240" required /></div></div>
             <div className="space-y-1.5"><Label htmlFor="download-url">Download URL</Label><Input id="download-url" type="url" value={form.downloadUrl} onChange={(event) => setForm({ ...form, downloadUrl: event.target.value })} placeholder="https://…" required /></div>
             <div className="flex items-center justify-between rounded-lg border border-border p-3"><div><Label htmlFor="version-active">Make version active</Label><p className="mt-1 text-xs text-muted-foreground">The release becomes available to clients.</p></div><Switch id="version-active" checked={form.active} onCheckedChange={(active) => setForm({ ...form, active })} /></div>
-            <DialogFooter><Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button><Button type="submit" disabled={saving}>{saving ? <LoaderCircle className="animate-spin" /> : <Plus />} Create version</Button></DialogFooter>
+            <DialogFooter><Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button><Button type="submit" disabled={saving}>{saving ? <LoaderCircle className="animate-spin" /> : form.existingId ? <RefreshCw /> : <Plus />}{form.existingId ? "Update version" : "Create version"}</Button></DialogFooter>
           </form>
         </DialogContent>
       </Dialog>

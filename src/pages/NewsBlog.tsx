@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   CalendarDays,
   CheckCircle2,
@@ -21,7 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { contentApi, readArrayPayload, type NewsArticle } from "@/lib/campushut-content-api";
-import { initialBlogPosts, type BlogPost } from "@/lib/mock-data";
+import { initialBlogPosts } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -65,7 +65,7 @@ export default function NewsBlogPage() {
   const [image, setImage] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const loadArticles = async () => {
+  const loadArticles = useCallback(async () => {
     setLoading(true);
     try {
       const payload = await contentApi.news.list();
@@ -79,11 +79,11 @@ export default function NewsBlogPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     void loadArticles();
-  }, []);
+  }, [loadArticles]);
 
   const filtered = useMemo(() => articles.filter((article) => {
     const matchesQuery = [article.title, article.summary, article.author]
@@ -133,7 +133,7 @@ export default function NewsBlogPage() {
           ? normalizeArticle({ ...article, ...response, ...form })
           : article));
       } else {
-        await contentApi.news.create({ ...form, imageUrl: "" }, image);
+        await contentApi.news.create(form, image);
         await loadArticles();
       }
       toast.success(selected ? "Article updated" : "Article created");

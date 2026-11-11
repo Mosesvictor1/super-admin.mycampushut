@@ -1,5 +1,5 @@
 const API_BASE_URL = (
-  import.meta.env.VITE_CAMPUSHUT_API_URL ??
+  import.meta.env.VITE_NEWS_BASE_URL ??
   "https://staging.mycampushut.com/campusHutNews"
 ).replace(/\/+$/, "");
 
@@ -83,6 +83,24 @@ export async function contentApiRequest<T>(path: string, options: ApiRequestOpti
           ? result
           : `${response.status} ${response.statusText}`;
     throw new Error(`CampusHut API: ${message}`);
+  }
+  if (result && typeof result === "object") {
+    const record = result as Record<string, unknown>;
+    const status = record.Status ?? record.status;
+    const body = record.body && typeof record.body === "object"
+      ? record.body as Record<string, unknown>
+      : undefined;
+    const nestedStatus = body?.Status ?? body?.status;
+    const reportedStatus = status ?? nestedStatus;
+    const isFailure = typeof reportedStatus === "number"
+      ? reportedStatus >= 400
+      : typeof reportedStatus === "string" &&
+        !/^(2\d\d(?:\s.*)?|0|ok|success|created|accepted)$/i.test(reportedStatus);
+    if (isFailure) {
+      const message = record.Message ?? record.message ?? record.error ?? record.detail ??
+        body?.Message ?? body?.message ?? body?.error ?? body?.detail;
+      throw new Error(`CampusHut API: ${typeof message === "string" ? message : `request failed (${String(reportedStatus)})`}`);
+    }
   }
   return result as T;
 }
@@ -216,7 +234,11 @@ export const contentApi = {
       if (image) form.set("banner", image);
       return contentApiRequest<unknown>("/api/ad-campaigns/updateCampaign", {
         method: "POST",
-        query: { campaignId: id, id, request: JSON.stringify({ ...request, id }) },
+        query: {
+          campaignId: id,
+          id,
+          request: JSON.stringify({ ...request, id, campaignId: id }),
+        },
         body: form,
       });
     },

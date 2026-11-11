@@ -154,7 +154,7 @@ export function DataTable({
           <tbody>
             {slice.map((r, i) => (
               <tr
-                key={r.id ?? i}
+                key={("id" in r ? r.id : undefined) ?? i}
                 onClick={() => {
                   setSelected(r);
                   setOpen(true);
