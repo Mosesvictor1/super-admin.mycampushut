@@ -160,15 +160,15 @@ export default function NewsBlogPage() {
     }
   };
 
-  const publishedCount = articles.filter((article) => /published|active/i.test(String(article.status ?? ""))).length;
-  const draftsCount = articles.length - publishedCount;
+  const newsCount = articles.filter((article) => /^news$/i.test(String(article.newsType ?? ""))).length;
+  const blogCount = articles.filter((article) => /^blog$/i.test(String(article.newsType ?? ""))).length;
 
   return (
     <DashboardLayout title="News" subtitle="CampusHut announcements and editorial updates">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <MiniStat icon={Newspaper} label="Total articles" value={articles.length} tone="primary" />
-        <MiniStat icon={CheckCircle2} label="Published" value={publishedCount} tone="blue" />
-        <MiniStat icon={FileText} label="Drafts & unclassified" value={draftsCount} tone="accent" />
+        <MiniStat icon={CheckCircle2} label="News articles" value={newsCount} tone="blue" />
+        <MiniStat icon={FileText} label="Blog articles" value={blogCount} tone="accent" />
       </div>
 
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">

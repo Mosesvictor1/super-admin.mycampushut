@@ -120,7 +120,7 @@ export default function AppVersionsPage() {
 
   return (
     <DashboardLayout title="Mobile app versions" subtitle="Release controls and client compatibility checks">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <MiniStat icon={Smartphone} label="Platforms" value="2" tone="primary" />
         <MiniStat icon={Activity} label="Release records this session" value={releases.length} tone="blue" />
         <MiniStat icon={Clock3} label="Version history" value="API unavailable" tone="accent" />
@@ -154,7 +154,7 @@ export default function AppVersionsPage() {
                 {result.status === "error" && <p role="alert" className="mt-2 text-xs text-muted-foreground">{result.error}</p>}
                 <div className="mt-4 border-t border-border pt-4">
                   <h4 className="text-xs font-semibold uppercase text-muted-foreground">Client version check</h4>
-                  <div className="mt-2 grid gap-2 sm:grid-cols-[1fr_110px_auto]">
+                  <div className="mt-2 grid min-w-0 gap-2 md:grid-cols-[minmax(0,1fr)_110px_auto]">
                     <Input aria-label={`${label} app version`} placeholder="Version (e.g. 2.4.0)" id={`${key}-version`} />
                     <Input aria-label={`${label} build number`} placeholder="Build" type="number" min="0" id={`${key}-build`} />
                     <Button variant="secondary" onClick={() => {
