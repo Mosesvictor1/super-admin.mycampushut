@@ -165,7 +165,7 @@ export default function NewsBlogPage() {
 
   return (
     <DashboardLayout title="News" subtitle="CampusHut announcements and editorial updates">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <MiniStat icon={Newspaper} label="Total articles" value={articles.length} tone="primary" />
         <MiniStat icon={CheckCircle2} label="News articles" value={newsCount} tone="blue" />
         <MiniStat icon={FileText} label="Blog articles" value={blogCount} tone="accent" />

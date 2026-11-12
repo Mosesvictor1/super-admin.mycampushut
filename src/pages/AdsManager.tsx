@@ -326,7 +326,7 @@ export default function AdsManagerPage() {
         <MiniStat icon={MousePointer2} label="Click-through rate" value={`${ctr.toFixed(2)}%`} tone="accent" />
       </div>
 
-      <div className="mt-7 grid gap-7 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="mt-7 grid gap-7 2xl:grid-cols-[minmax(0,1fr)_320px]">
         <section className="min-w-0" aria-labelledby="campaigns-title">
           <div className="flex flex-wrap items-end justify-between gap-3 border-b border-border pb-3">
             <div><h2 id="campaigns-title" className="text-base font-semibold">Campaigns</h2><p className="mt-1 text-sm text-muted-foreground">{filtered.length} campaigns · {pendingCount} awaiting review</p></div>
