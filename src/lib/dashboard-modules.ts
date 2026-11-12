@@ -7,7 +7,9 @@ export const dashboardModules = {
   assignments: false,
   marketplace: false,
   library: false,
-  newsBlog: false,
+  newsBlog: true,
+  mobileVersions: true,
+  adsManager: true,
   brand: false,
   reports: false,
 } as const;
