@@ -10,3 +10,5 @@
 <!-- LOVABLE:END -->
 
 Use `src/lib/campushut-content-api.ts` as the single browser client for CampusHut news, app-version, advertiser, and ad-campaign endpoints; normalize unknown response envelopes at page boundaries because the API schemas are inconsistent.
+
+Route CampusHut content API browser requests through same-origin `/news-proxy`; keep the Vite development proxy and Vercel rewrite aligned to the upstream service prefix.

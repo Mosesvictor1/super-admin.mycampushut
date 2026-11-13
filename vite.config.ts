@@ -9,6 +9,13 @@ export default defineConfig({
     host: "::",
     port: 8080,
     strictPort: true,
+    proxy: {
+      "/news-proxy": {
+        target: "https://api.mycampushut.com",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/news-proxy/, "/campusHutNews"),
+      },
+    },
   },
   preview: {
     host: "::",

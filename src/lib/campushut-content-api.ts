@@ -1,5 +1,5 @@
 const API_BASE_URL = (
-  import.meta.env.VITE_NEWS_BASE_URL ?? "https://www.mycampushut.com/news-proxy"
+  import.meta.env.VITE_NEWS_BASE_URL ?? "/news-proxy"
 ).replace(/\/+$/, "");
 
 export interface NewsArticle {
@@ -63,7 +63,7 @@ export async function contentApiRequest<T>(
   options: ApiRequestOptions = {},
 ): Promise<T> {
   const { query, headers, ...init } = options;
-  const url = new URL(`${API_BASE_URL}${path}`);
+  const url = new URL(`${API_BASE_URL}${path}`, window.location.origin);
   Object.entries(query ?? {}).forEach(([key, value]) => {
     if (value !== undefined && value !== "") url.searchParams.set(key, String(value));
   });
