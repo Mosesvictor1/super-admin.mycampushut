@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "https://api.mycampushut.com/dashboard";
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ?? "https://staging.mycampushut.com/dashboard";
 
 export interface OverviewFilters {
   startDate?: string;
