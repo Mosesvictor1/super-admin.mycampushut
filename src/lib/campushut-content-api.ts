@@ -1,6 +1,5 @@
 const API_BASE_URL = (
-  import.meta.env.VITE_NEWS_BASE_URL ??
-  "https://staging.mycampushut.com/campusHutNews"
+  import.meta.env.VITE_NEWS_BASE_URL ?? "https://api.mycampushut.com/campusHutNews"
 ).replace(/\/+$/, "");
 
 export interface NewsArticle {
@@ -59,7 +58,10 @@ export interface ApiRequestOptions extends RequestInit {
   query?: Record<string, string | number | boolean | undefined>;
 }
 
-export async function contentApiRequest<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
+export async function contentApiRequest<T>(
+  path: string,
+  options: ApiRequestOptions = {},
+): Promise<T> {
   const { query, headers, ...init } = options;
   const url = new URL(`${API_BASE_URL}${path}`);
   Object.entries(query ?? {}).forEach(([key, value]) => {
@@ -87,19 +89,30 @@ export async function contentApiRequest<T>(path: string, options: ApiRequestOpti
   if (result && typeof result === "object") {
     const record = result as Record<string, unknown>;
     const status = record.Status ?? record.status;
-    const body = record.body && typeof record.body === "object"
-      ? record.body as Record<string, unknown>
-      : undefined;
+    const body =
+      record.body && typeof record.body === "object"
+        ? (record.body as Record<string, unknown>)
+        : undefined;
     const nestedStatus = body?.Status ?? body?.status;
     const reportedStatus = status ?? nestedStatus;
-    const isFailure = typeof reportedStatus === "number"
-      ? reportedStatus >= 400
-      : typeof reportedStatus === "string" &&
-        !/^(2\d\d(?:\s.*)?|0|ok|success|created|accepted)$/i.test(reportedStatus);
+    const isFailure =
+      typeof reportedStatus === "number"
+        ? reportedStatus >= 400
+        : typeof reportedStatus === "string" &&
+          !/^(2\d\d(?:\s.*)?|0|ok|success|created|accepted)$/i.test(reportedStatus);
     if (isFailure) {
-      const message = record.Message ?? record.message ?? record.error ?? record.detail ??
-        body?.Message ?? body?.message ?? body?.error ?? body?.detail;
-      throw new Error(`CampusHut API: ${typeof message === "string" ? message : `request failed (${String(reportedStatus)})`}`);
+      const message =
+        record.Message ??
+        record.message ??
+        record.error ??
+        record.detail ??
+        body?.Message ??
+        body?.message ??
+        body?.error ??
+        body?.detail;
+      throw new Error(
+        `CampusHut API: ${typeof message === "string" ? message : `request failed (${String(reportedStatus)})`}`,
+      );
     }
   }
   return result as T;
