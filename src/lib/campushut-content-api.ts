@@ -1,5 +1,5 @@
 const API_BASE_URL = (
-  import.meta.env.VITE_NEWS_BASE_URL ?? "https://api.mycampushut.com/campusHutNews"
+  import.meta.env.VITE_NEWS_BASE_URL ?? "https://www.mycampushut.com/news-proxy"
 ).replace(/\/+$/, "");
 
 export interface NewsArticle {
@@ -145,9 +145,9 @@ export function readArrayPayload<T>(value: unknown, keys: string[] = []): T[] {
 
 export const contentApi = {
   news: {
-    list: (page = 0, size = 100) =>
+    list: (page = 0, size = 20) =>
       contentApiRequest<unknown>("/api/news/getAllNews", {
-        query: { page, size, sort: "id,desc" },
+        query: { page, size },
       }),
     byId: (id: number) => contentApiRequest<NewsArticle>(`/api/news/getNews/${id}`),
     searchTitle: (title: string) =>
