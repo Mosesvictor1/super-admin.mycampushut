@@ -1,6 +1,4 @@
-const API_BASE_URL = (
-  import.meta.env.VITE_NEWS_BASE_URL ?? "/news-proxy"
-).replace(/\/+$/, "");
+const API_BASE_URL = (import.meta.env.VITE_NEWS_BASE_URL ?? "/news-proxy").replace(/\/+$/, "");
 
 export interface NewsArticle {
   id?: number;
@@ -56,14 +54,16 @@ export interface AdCampaign {
 
 export interface ApiRequestOptions extends RequestInit {
   query?: Record<string, string | number | boolean | undefined>;
+  /** Overrides the default content proxy prefix (used by the referral client). */
+  baseUrl?: string;
 }
 
 export async function contentApiRequest<T>(
   path: string,
   options: ApiRequestOptions = {},
 ): Promise<T> {
-  const { query, headers, ...init } = options;
-  const url = new URL(`${API_BASE_URL}${path}`, window.location.origin);
+  const { query, headers, baseUrl = API_BASE_URL, ...init } = options;
+  const url = new URL(`${baseUrl}${path}`, window.location.origin);
   Object.entries(query ?? {}).forEach(([key, value]) => {
     if (value !== undefined && value !== "") url.searchParams.set(key, String(value));
   });

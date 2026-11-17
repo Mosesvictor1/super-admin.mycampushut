@@ -10,6 +10,7 @@ export const dashboardModules = {
   newsBlog: true,
   mobileVersions: true,
   adsManager: true,
+  ambassadors: true,
   brand: false,
   reports: false,
 } as const;

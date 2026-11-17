@@ -12,6 +12,7 @@ import BrandPage from "./pages/Brand";
 import ReportsPage from "./pages/Reports";
 import AppVersionsPage from "./pages/AppVersions";
 import AdsManagerPage from "./pages/AdsManager";
+import AmbassadorsPage from "./pages/Ambassadors";
 import NotFoundPage from "./pages/NotFound";
 import { dashboardModules } from "./lib/dashboard-modules";
 
@@ -52,6 +53,10 @@ export default function App() {
       <Route
         path="/ads-manager"
         element={dashboardModules.adsManager ? <AdsManagerPage /> : unavailable}
+      />
+      <Route
+        path="/ambassadors"
+        element={dashboardModules.ambassadors ? <AmbassadorsPage /> : unavailable}
       />
       <Route path="/brand" element={dashboardModules.brand ? <BrandPage /> : unavailable} />
       <Route path="/reports" element={dashboardModules.reports ? <ReportsPage /> : unavailable} />

@@ -17,6 +17,7 @@ import {
   Newspaper,
   Megaphone,
   Smartphone,
+  Award,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -37,6 +38,7 @@ const NAV = [
   { to: "/news-blog", label: "News & Blog", icon: Newspaper, module: "newsBlog" },
   { to: "/app-versions", label: "Mobile App Versions", icon: Smartphone, module: "mobileVersions" },
   { to: "/ads-manager", label: "Ads Manager", icon: Megaphone, module: "adsManager" },
+  { to: "/ambassadors", label: "Ambassador Referrals", icon: Award, module: "ambassadors" },
   { to: "/brand", label: "Brand Ads", icon: Megaphone, module: "brand" },
   { to: "/reports", label: "Reports", icon: FileBarChart, module: "reports" },
 ] satisfies {
