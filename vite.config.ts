@@ -11,7 +11,7 @@ export default defineConfig({
     strictPort: true,
     proxy: {
       "/referral-proxy": {
-        target: "https://staging.mycampushut.com",
+        target: "https://api.mycampushut.com",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/referral-proxy/, "/referral"),
       },

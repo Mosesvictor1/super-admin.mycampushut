@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/referral-proxy/:path*",
-      "destination": "https://staging.mycampushut.com/referral/:path*"
+      "destination": "https://api.mycampushut.com/referral/:path*"
     },
     {
       "source": "/news-proxy/:path*",
