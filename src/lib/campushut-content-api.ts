@@ -175,12 +175,12 @@ export const contentApi = {
     create: (request: AppVersionRequest) =>
       contentApiRequest<unknown>("/api/version", {
         method: "POST",
-        query: { request: JSON.stringify(request) },
+        query: { ...request },
       }),
     update: (id: number, request: AppVersionRequest) =>
       contentApiRequest<unknown>(`/api/version/${id}`, {
         method: "PUT",
-        query: { id, request: JSON.stringify(request) },
+        query: { id, ...request },
       }),
     check: (platform: AppVersionRequest["platform"], version: string, buildNumber: number) =>
       contentApiRequest<unknown>("/api/version/check", {

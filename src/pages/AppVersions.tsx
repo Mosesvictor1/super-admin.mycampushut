@@ -203,6 +203,20 @@ export default function AppVersionsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const openUpdateDialog = (platform: Platform, latest: unknown) => {
+    const data = isRecord(latest) ? latest : {};
+    const id = data.appId ?? data.id;
+    setForm({
+      platform,
+      version: "",
+      buildNumber: "",
+      downloadUrl: typeof data.downloadUrl === "string" ? data.downloadUrl : "",
+      active: typeof data.active === "boolean" ? data.active : true,
+      existingId: id !== undefined && id !== null ? String(id) : "",
+    });
+    setOpen(true);
+  };
+
   const checkClientVersion = async (platform: Platform, version: string, build: number) => {
     setChecks((all) => ({ ...all, [platform]: { status: "loading" } }));
     try {
@@ -293,7 +307,12 @@ export default function AppVersionsPage() {
               The latest release for each platform loads automatically.
             </p>
           </div>
-          <Button onClick={() => setOpen(true)}>
+          <Button
+            onClick={() => {
+              setForm(emptyForm);
+              setOpen(true);
+            }}
+          >
             <Plus /> Create app version
           </Button>
         </div>
@@ -351,6 +370,18 @@ export default function AppVersionsPage() {
                   )}
                 </div>
                 {result.status === "success" && <ReleaseSummary value={result.value} />}
+                {result.status === "success" &&
+                  isRecord(result.value) &&
+                  "latestVersion" in result.value && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-3"
+                      onClick={() => openUpdateDialog(key, result.value)}
+                    >
+                      <Upload /> Add new version
+                    </Button>
+                  )}
                 {result.status === "error" && (
                   <p role="alert" className="mt-2 text-xs text-muted-foreground">
                     {result.error}
@@ -483,7 +514,7 @@ export default function AppVersionsPage() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Create app version</DialogTitle>
+            <DialogTitle>{form.existingId ? "Update app version" : "Create app version"}</DialogTitle>
             <DialogDescription>
               Register a release using the documented Android and iOS fields.
             </DialogDescription>
